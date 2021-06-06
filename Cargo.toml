@@ -1,5 +1,5 @@
 [package]
-name = "meirei"
+name = "flush"
 version = "0.1.0"
 authors = ["wyx0-xyz <nathan@trioleyre.fr>"]
 edition = "2018"
