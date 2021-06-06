@@ -123,7 +123,7 @@ impl Lexer {
             ':' => self.push_token(Token::Colon),
             ';' => self.push_token(Token::Semicolon),
             ',' => self.push_token(Token::Comma),
-            '+' | '-' | '*' | '/' | '%' | '^' => self.push_token(Token::Operator(character)),
+            '+' | '-' | '*' | '/' | '%' | '^' | '=' => self.push_token(Token::Operator(character)),
             '"' => self.parse_string(),
             '#' => self.skip_comment(),
             _ if character.is_ascii_digit() => self.parse_number(),
