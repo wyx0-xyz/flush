@@ -3,7 +3,12 @@ name = "flush"
 version = "0.1.0"
 authors = ["wyx0-xyz <nathan@trioleyre.fr>"]
 edition = "2018"
+description = "Programming language written in Rust"
+readme = "https://github.com/flush-lang/flush/blob/master/README.md"
+homepage = "https://github.com/flush-lang/flush"
+repository = "https://github.com/flush-lang/flush"
 license = "MIT"
+keywords = ["flush", "language"]
 
 [dependencies]
 clap = "2.33.3"
