@@ -1,4 +1,5 @@
 mod lexer;
+mod parser;
 
 use clap::{App, Arg};
 use lexer::lexer::Lexer;
