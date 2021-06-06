@@ -99,7 +99,12 @@ impl Lexer {
             }
         }
 
-        self.push_token(Token::Ident(identifier));
+        let token = match identifier.as_str() {
+            "def" => Token::Def,
+            ident => Token::Ident(ident.to_string()),
+        };
+
+        self.push_token(token);
     }
 
     fn parse_token(&mut self) {

@@ -9,6 +9,7 @@ pub enum Token {
     Colon,          // :
     Semicolon,      // ;
     Comma,          // ,
+    Def,            // def
     String(String), // "Hello, World!"
     Int(u32),       // 42
     Float(f32),     // 3.14
