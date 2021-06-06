@@ -1,0 +1,9 @@
+[package]
+name = "meirei"
+version = "0.1.0"
+authors = ["wyx0-xyz <nathan@trioleyre.fr>"]
+edition = "2018"
+license = "MIT"
+
+[dependencies]
+ 
