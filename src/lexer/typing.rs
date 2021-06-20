@@ -13,6 +13,6 @@ pub enum Token {
     String(String), // "Hello, World!"
     Int(u32),       // 42
     Float(f32),     // 3.14
-    Ident(String),  // def
+    Ident(String),  // user
     Operator(char), // +
 }
