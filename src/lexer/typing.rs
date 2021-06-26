@@ -1,5 +1,5 @@
 #[derive(Clone, Debug, PartialEq)]
-pub enum Token {
+pub enum TokenKind {
     LParen,         // (
     RParen,         // )
     LBrace,         // {
@@ -15,4 +15,10 @@ pub enum Token {
     Float(f32),     // 3.14
     Ident(String),  // user
     Operator(char), // +
+}
+
+#[derive(Clone, Debug)]
+pub struct Token {
+    pub line: usize,
+    pub kind: TokenKind
 }
