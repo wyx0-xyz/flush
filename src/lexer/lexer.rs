@@ -1,4 +1,5 @@
 use super::typing::{Token, TokenKind};
+use crate::error::{FlushError, Result};
 
 #[derive(Default)]
 pub struct Lexer {
@@ -51,7 +52,7 @@ impl Lexer {
         self.line += 1;
     }
 
-    fn parse_string(&mut self) {
+    fn parse_string(&mut self) -> Result<()> {
         let mut string = String::new();
 
         while !self.is_at_end() && self.current() != Some('"') {
@@ -64,11 +65,17 @@ impl Lexer {
         }
 
         if self.current() != Some('"') {
-            panic!("Unclosed string found!")
+            return Err(FlushError(
+                self.file.clone(),
+                self.line,
+                "Unterminated string".to_string(),
+            ));
         }
 
         self.advance(); // skip "
         self.push_token(TokenKind::String(string));
+
+        Ok(())
     }
 
     fn parse_number(&mut self) {
@@ -119,10 +126,10 @@ impl Lexer {
         self.push_token(token);
     }
 
-    fn parse_token(&mut self) {
+    fn parse_token(&mut self) -> Result<()> {
         let character = match self.advance() {
             Some(token) => token,
-            None => return,
+            None => return Ok(()),
         };
 
         match character {
@@ -138,44 +145,49 @@ impl Lexer {
             '+' | '-' | '*' | '/' | '%' | '^' | '=' => {
                 self.push_token(TokenKind::Operator(character))
             }
-            '"' => self.parse_string(),
+            '"' => self.parse_string()?,
             '#' => self.skip_comment(),
             '\n' => self.line += 1,
             _ if character.is_ascii_digit() => self.parse_number(),
             _ if character.is_ascii_alphanumeric() => self.parse_identifier(),
             _ => (),
         };
+
+        Ok(())
     }
 
-    pub fn tokenize(&mut self) -> &Vec<Token> {
+    pub fn tokenize(&mut self) -> Result<Vec<Token>> {
         while !self.is_at_end() {
-            self.parse_token();
+            self.parse_token()?
         }
 
-        &self.tokens
+        Ok(self.tokens.clone())
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::Lexer;
-    use crate::lexer::typing::*;
+    use crate::error::Result;
+    use crate::lexer::typing::{Token, TokenKind};
 
-    fn get_types(tokens: &Vec<Token>) -> Vec<TokenKind> {
+    fn get_types(tokens: Vec<Token>) -> Vec<TokenKind> {
         tokens.into_iter().map(|t| t.kind.clone()).collect()
     }
 
     #[test]
-    fn single_line_comment() {
+    fn single_line_comment() -> Result<()> {
         let mut lexer = Lexer::new("# hello, world\n#lorem".to_string(), "__test__");
-        assert_eq!(get_types(lexer.tokenize()), vec![])
+        assert_eq!(get_types(lexer.tokenize()?), vec![]);
+
+        Ok(())
     }
 
     #[test]
-    fn parentheses_braces_brackets() {
+    fn parentheses_braces_brackets() -> Result<()> {
         let mut lexer = Lexer::new("( } [ ) { ]".to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![
                 TokenKind::LParen,
                 TokenKind::RBrace,
@@ -184,57 +196,69 @@ mod test {
                 TokenKind::LBrace,
                 TokenKind::RBracket
             ]
-        )
+        );
+
+        Ok(())
     }
 
     #[test]
-    fn punctuation() {
+    fn punctuation() -> Result<()> {
         let mut lexer = Lexer::new("; , :".to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![TokenKind::Semicolon, TokenKind::Comma, TokenKind::Colon]
-        )
+        );
+
+        Ok(())
     }
 
     #[test]
-    fn string() {
+    fn string() -> Result<()> {
         let mut lexer = Lexer::new(r#""Hello, World!""#.to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![TokenKind::String("Hello, World!".to_string())]
         );
+
+        Ok(())
     }
 
     #[test]
-    #[should_panic(expected = "Unclosed string found!")]
     fn unclosed_string() {
         let mut lexer = Lexer::new(r#""Hello flush"#.to_string(), "__test__");
-        lexer.tokenize();
+        match lexer.tokenize() {
+            Ok(_) => panic!(),
+            Err(e) => assert_eq!(e.2, "Unterminated string"),
+        }
     }
 
     #[test]
-    fn numbers() {
+    fn numbers() -> Result<()> {
         let mut lexer = Lexer::new("32 18.25".to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![TokenKind::Int(32), TokenKind::Float(18.25)]
-        )
+        );
+
+        Ok(())
     }
 
     #[test]
-    fn keywords() {
+    fn keywords() -> Result<()> {
         let mut lexer = Lexer::new("def user".to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![TokenKind::Def, TokenKind::Ident("user".to_string())]
-        )
+        );
+
+        Ok(())
     }
 
     #[test]
-    fn operators() {
-        let mut lexer = Lexer::new("+/*-=%".to_string(), "__test__");
+    fn operators() -> Result<()> {
+        let mut lexer = Lexer::new("+ / * - = %".to_string(), "__test__");
         assert_eq!(
-            get_types(lexer.tokenize()),
+            get_types(lexer.tokenize()?),
             vec![
                 TokenKind::Operator('+'),
                 TokenKind::Operator('/'),
@@ -243,6 +267,8 @@ mod test {
                 TokenKind::Operator('='),
                 TokenKind::Operator('%'),
             ]
-        )
+        );
+
+        Ok(())
     }
 }

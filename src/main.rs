@@ -1,3 +1,4 @@
+mod error;
 mod lexer;
 mod parser;
 
@@ -28,8 +29,13 @@ fn main() {
         }
     };
 
-    let mut lexer = Lexer::new(file_content);
-    let tokens = lexer.tokenize();
+    let mut lexer = Lexer::new(file_content, file_path.to_str().unwrap_or(""));
+    let tokens = match lexer.tokenize() {
+        Ok(tokens) => tokens,
+        Err(e) => {
+            return eprintln!("=> {}:{}\nerror: {}", e.0, e.1, e.2);
+        }
+    };
 
     println!("Tokens: {:?}", tokens);
 }
