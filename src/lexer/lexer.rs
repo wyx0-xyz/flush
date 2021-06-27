@@ -3,15 +3,17 @@ use super::typing::{Token, TokenKind};
 #[derive(Default)]
 pub struct Lexer {
     program: String,
+    file: String,
     tokens: Vec<Token>,
     position: usize,
     line: usize,
 }
 
 impl Lexer {
-    pub fn new(program: String) -> Self {
+    pub fn new(program: String, file: impl ToString) -> Self {
         Self {
             program,
+            file: file.to_string(),
             line: 1,
             ..Default::default()
         }
@@ -165,13 +167,13 @@ mod test {
 
     #[test]
     fn single_line_comment() {
-        let mut lexer = Lexer::new("# hello, world\n#lorem".to_string());
+        let mut lexer = Lexer::new("# hello, world\n#lorem".to_string(), "__test__");
         assert_eq!(get_types(lexer.tokenize()), vec![])
     }
 
     #[test]
     fn parentheses_braces_brackets() {
-        let mut lexer = Lexer::new("( } [ ) { ]".to_string());
+        let mut lexer = Lexer::new("( } [ ) { ]".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![
@@ -187,7 +189,7 @@ mod test {
 
     #[test]
     fn punctuation() {
-        let mut lexer = Lexer::new("; , :".to_string());
+        let mut lexer = Lexer::new("; , :".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![TokenKind::Semicolon, TokenKind::Comma, TokenKind::Colon]
@@ -196,7 +198,7 @@ mod test {
 
     #[test]
     fn string() {
-        let mut lexer = Lexer::new(r#""Hello, World!""#.to_string());
+        let mut lexer = Lexer::new(r#""Hello, World!""#.to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![TokenKind::String("Hello, World!".to_string())]
@@ -206,13 +208,13 @@ mod test {
     #[test]
     #[should_panic(expected = "Unclosed string found!")]
     fn unclosed_string() {
-        let mut lexer = Lexer::new(r#""Hello flush"#.to_string());
+        let mut lexer = Lexer::new(r#""Hello flush"#.to_string(), "__test__");
         lexer.tokenize();
     }
 
     #[test]
     fn numbers() {
-        let mut lexer = Lexer::new("32 18.25".to_string());
+        let mut lexer = Lexer::new("32 18.25".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![TokenKind::Int(32), TokenKind::Float(18.25)]
@@ -221,7 +223,7 @@ mod test {
 
     #[test]
     fn keywords() {
-        let mut lexer = Lexer::new("def user".to_string());
+        let mut lexer = Lexer::new("def user".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![TokenKind::Def, TokenKind::Ident("user".to_string())]
@@ -230,7 +232,7 @@ mod test {
 
     #[test]
     fn operators() {
-        let mut lexer = Lexer::new("+/*-=%".to_string());
+        let mut lexer = Lexer::new("+/*-=%".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()),
             vec![
