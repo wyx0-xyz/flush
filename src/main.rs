@@ -1,9 +1,9 @@
 mod error;
-mod lexer;
+mod lexing;
 mod parser;
 
 use clap::{App, Arg};
-use lexer::lexer::Lexer;
+use lexing::lexer::Lexer;
 use std::{fs, path, process};
 
 fn main() {
