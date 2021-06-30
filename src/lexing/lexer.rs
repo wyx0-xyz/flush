@@ -62,6 +62,7 @@ impl Lexer {
                         self.file.clone(),
                         self.line,
                         "Ilegal newline in string".to_string(),
+                        Some("use \\n instead".to_string()),
                     ))
                 }
                 Some(character) => string.push(character),
@@ -76,6 +77,7 @@ impl Lexer {
                 self.file.clone(),
                 self.line,
                 "Unterminated string".to_string(),
+                None,
             ));
         }
 
