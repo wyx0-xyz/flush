@@ -1,6 +1,6 @@
 mod error;
 mod lexing;
-mod parser;
+// mod parser;
 
 use clap::{App, Arg};
 use lexing::lexer::Lexer;
@@ -32,9 +32,7 @@ fn main() {
     let mut lexer = Lexer::new(file_content, file_path.to_str().unwrap_or(""));
     let tokens = match lexer.tokenize() {
         Ok(tokens) => tokens,
-        Err(e) => {
-            return eprintln!("=> {}:{}\nerror: {}", e.0, e.1, e.2);
-        }
+        Err(e) => return eprintln!("{}", e),
     };
 
     println!("Tokens: {:?}", tokens);

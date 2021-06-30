@@ -61,7 +61,7 @@ impl Lexer {
                     return Err(FlushError(
                         self.file.clone(),
                         self.line,
-                        "Ilegal newline in string.".to_string(),
+                        "Ilegal newline in string".to_string(),
                     ))
                 }
                 Some(character) => string.push(character),
@@ -75,7 +75,7 @@ impl Lexer {
             return Err(FlushError(
                 self.file.clone(),
                 self.line,
-                "Unterminated string.".to_string(),
+                "Unterminated string".to_string(),
             ));
         }
 
