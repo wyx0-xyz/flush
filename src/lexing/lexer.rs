@@ -129,6 +129,8 @@ impl Lexer {
 
         let token = match identifier.as_str() {
             "def" => TokenKind::Def,
+            "true" => TokenKind::Boolean(true),
+            "false" => TokenKind::Boolean(false),
             ident => TokenKind::Ident(ident.to_string()),
         };
 

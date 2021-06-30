@@ -13,6 +13,7 @@ pub enum TokenKind {
     String(String), // "Hello, World!"
     Int(u32),       // 42
     Float(f32),     // 3.14
+    Boolean(bool),  // false
     Ident(String),  // user
     Operator(char), // +
 }
