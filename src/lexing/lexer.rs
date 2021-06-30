@@ -57,6 +57,13 @@ impl Lexer {
 
         while !self.is_at_end() && self.current() != Some('"') {
             match self.current() {
+                Some('\n') => {
+                    return Err(FlushError(
+                        self.file.clone(),
+                        self.line,
+                        "Ilegal newline in string.".to_string(),
+                    ))
+                }
                 Some(character) => string.push(character),
                 None => break,
             };
@@ -68,7 +75,7 @@ impl Lexer {
             return Err(FlushError(
                 self.file.clone(),
                 self.line,
-                "Unterminated string".to_string(),
+                "Unterminated string.".to_string(),
             ));
         }
 
