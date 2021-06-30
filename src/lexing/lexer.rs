@@ -61,7 +61,7 @@ impl Lexer {
                     return Err(FlushError(
                         self.file.clone(),
                         self.line,
-                        "Ilegal newline in string".to_string(),
+                        "Illegal newline in string".to_string(),
                         Some("use \\n instead".to_string()),
                     ))
                 }
