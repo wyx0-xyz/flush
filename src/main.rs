@@ -1,9 +1,10 @@
 mod error;
 mod lexing;
-// mod parser;
+mod parsing;
 
 use clap::{App, Arg};
 use lexing::lexer::Lexer;
+use parsing::parser::Parser;
 use std::{fs, path, process};
 
 fn main() {
@@ -36,4 +37,12 @@ fn main() {
     };
 
     println!("Tokens: {:?}", tokens);
+
+    let mut parser = Parser::new(tokens, file_path.to_str().unwrap_or(""));
+    let statements = match parser.parse() {
+        Ok(statements) => statements,
+        Err(e) => return eprintln!("{}", e),
+    };
+
+    println!("Statements: {:?}", statements);
 }
