@@ -1,4 +1,4 @@
-# flush-lang ![flush-logo](./assets/flush-logo.png)
+# flush-lang
 
 flush-lang is an interpreted programming language written in Rust.
 
