@@ -256,10 +256,15 @@ mod test {
 
     #[test]
     fn keywords() -> Result<()> {
-        let mut lexer = Lexer::new("def user".to_string(), "__test__");
+        let mut lexer = Lexer::new("def false user true".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
-            vec![TokenKind::Def, TokenKind::Ident("user".to_string())]
+            vec![
+                TokenKind::Def,
+                TokenKind::Boolean(false),
+                TokenKind::Ident("user".to_string()),
+                TokenKind::Boolean(true)
+            ]
         );
 
         Ok(())
