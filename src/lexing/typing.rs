@@ -10,6 +10,7 @@ pub enum TokenKind {
     Semicolon,      // ;
     Comma,          // ,
     Def,            // def
+    Return,         // return
     String(String), // "Hello, World!"
     Int(u32),       // 42
     Float(f32),     // 3.14

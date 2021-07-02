@@ -129,6 +129,7 @@ impl Lexer {
 
         let token = match identifier.as_str() {
             "def" => TokenKind::Def,
+            "return" => TokenKind::Return,
             "true" => TokenKind::Boolean(true),
             "false" => TokenKind::Boolean(false),
             ident => TokenKind::Ident(ident.to_string()),
@@ -256,14 +257,15 @@ mod test {
 
     #[test]
     fn keywords() -> Result<()> {
-        let mut lexer = Lexer::new("def false user true".to_string(), "__test__");
+        let mut lexer = Lexer::new("def false user true return".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
                 TokenKind::Def,
                 TokenKind::Boolean(false),
                 TokenKind::Ident("user".to_string()),
-                TokenKind::Boolean(true)
+                TokenKind::Boolean(true),
+                TokenKind::Return
             ]
         );
 
