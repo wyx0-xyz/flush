@@ -5,7 +5,7 @@ mod parsing;
 use clap::{App, Arg};
 use lexing::lexer::Lexer;
 use parsing::parser::Parser;
-use std::{fs, path, process};
+use std::{fs, path};
 
 fn main() {
     let matches = App::new("flush-lang")
@@ -25,8 +25,7 @@ fn main() {
     let file_content = match fs::read_to_string(file_path) {
         Ok(content) => content,
         Err(error) => {
-            println!("Couldn't open {}: {}", file_path.display(), error);
-            process::exit(1);
+            return eprintln!("Couldn't open {}: {}", file_path.display(), error);
         }
     };
 
@@ -36,7 +35,7 @@ fn main() {
         Err(e) => return eprintln!("{}", e),
     };
 
-    println!("Tokens: {:?}", tokens);
+    println!("Tokens: {:?}", tokens);
 
     let mut parser = Parser::new(tokens, file_path.to_str().unwrap_or(""));
     let statements = match parser.parse() {
