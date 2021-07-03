@@ -2,6 +2,8 @@
 pub enum Statement {
     VarDef(String, Expr),
     FuncDef(String, Vec<String>, Vec<Statement>),
+    Return(Expr),
+    Expr(Expr),
 }
 
 #[derive(Clone, Debug)]
