@@ -1,4 +1,4 @@
-use super::typing::{Token, TokenKind};
+use super::typing::*;
 use crate::error::{FlushError, Result};
 
 #[derive(Default)]
@@ -153,11 +153,11 @@ impl Lexer {
             ']' => self.push_token(TokenKind::RBracket),
             ':' => self.push_token(TokenKind::Colon),
             ',' => self.push_token(TokenKind::Comma),
-            '+' => self.push_token(TokenKind::OpAdd),
-            '-' => self.push_token(TokenKind::OpSub),
-            '*' => self.push_token(TokenKind::OpMul),
-            '/' => self.push_token(TokenKind::OpDiv),
-            '%' => self.push_token(TokenKind::OpMod),
+            '+' => self.push_token(TokenKind::Op(Op::Add)),
+            '-' => self.push_token(TokenKind::Op(Op::Sub)),
+            '*' => self.push_token(TokenKind::Op(Op::Mul)),
+            '/' => self.push_token(TokenKind::Op(Op::Div)),
+            '%' => self.push_token(TokenKind::Op(Op::Mod)),
             '=' => self.push_token(TokenKind::Equal),
             '"' => self.parse_string()?,
             '#' => self.skip_comment(),
@@ -183,7 +183,7 @@ impl Lexer {
 mod test {
     use super::Lexer;
     use crate::error::Result;
-    use crate::lexing::typing::{Token, TokenKind};
+    use crate::lexing::typing::*;
 
     fn get_types(tokens: Vec<Token>) -> Vec<TokenKind> {
         tokens.into_iter().map(|t| t.kind.clone()).collect()
@@ -281,11 +281,11 @@ mod test {
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
-                TokenKind::OpAdd,
-                TokenKind::OpDiv,
-                TokenKind::OpMul,
-                TokenKind::OpSub,
-                TokenKind::OpMod,
+                TokenKind::Op(Op::Add),
+                TokenKind::Op(Op::Div),
+                TokenKind::Op(Op::Mul),
+                TokenKind::Op(Op::Sub),
+                TokenKind::Op(Op::Mod),
                 TokenKind::Equal
             ]
         );
