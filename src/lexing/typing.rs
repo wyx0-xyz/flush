@@ -7,7 +7,6 @@ pub enum TokenKind {
     LBracket,       // [
     RBracket,       // ]
     Colon,          // :
-    Semicolon,      // ;
     Comma,          // ,
     Def,            // def
     Return,         // return

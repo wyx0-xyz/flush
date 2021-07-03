@@ -152,7 +152,6 @@ impl Lexer {
             '[' => self.push_token(TokenKind::LBracket),
             ']' => self.push_token(TokenKind::RBracket),
             ':' => self.push_token(TokenKind::Colon),
-            ';' => self.push_token(TokenKind::Semicolon),
             ',' => self.push_token(TokenKind::Comma),
             '+' => self.push_token(TokenKind::OpAdd),
             '-' => self.push_token(TokenKind::OpSub),
@@ -218,10 +217,10 @@ mod test {
 
     #[test]
     fn punctuation() -> Result<()> {
-        let mut lexer = Lexer::new("; , :".to_string(), "__test__");
+        let mut lexer = Lexer::new(", :".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
-            vec![TokenKind::Semicolon, TokenKind::Comma, TokenKind::Colon]
+            vec![TokenKind::Comma, TokenKind::Colon]
         );
 
         Ok(())
