@@ -16,7 +16,12 @@ pub enum TokenKind {
     Float(f32),     // 3.14
     Boolean(bool),  // false
     Ident(String),  // user
-    Operator(char), // +
+    OpAdd,          // +
+    OpSub,          // -
+    OpMul,          // *
+    OpDiv,          // /
+    OpMod,          // %
+    Equal,          // =
 }
 
 #[derive(Clone, Debug)]

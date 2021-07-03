@@ -154,9 +154,12 @@ impl Lexer {
             ':' => self.push_token(TokenKind::Colon),
             ';' => self.push_token(TokenKind::Semicolon),
             ',' => self.push_token(TokenKind::Comma),
-            '+' | '-' | '*' | '/' | '%' | '^' | '=' => {
-                self.push_token(TokenKind::Operator(character))
-            }
+            '+' => self.push_token(TokenKind::OpAdd),
+            '-' => self.push_token(TokenKind::OpSub),
+            '*' => self.push_token(TokenKind::OpMul),
+            '/' => self.push_token(TokenKind::OpDiv),
+            '%' => self.push_token(TokenKind::OpMod),
+            '=' => self.push_token(TokenKind::Equal),
             '"' => self.parse_string()?,
             '#' => self.skip_comment(),
             '\n' => self.line += 1,
@@ -275,16 +278,16 @@ mod test {
 
     #[test]
     fn operators() -> Result<()> {
-        let mut lexer = Lexer::new("+ / * - = %".to_string(), "__test__");
+        let mut lexer = Lexer::new("+ / * - % =".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
-                TokenKind::Operator('+'),
-                TokenKind::Operator('/'),
-                TokenKind::Operator('*'),
-                TokenKind::Operator('-'),
-                TokenKind::Operator('='),
-                TokenKind::Operator('%'),
+                TokenKind::OpAdd,
+                TokenKind::OpDiv,
+                TokenKind::OpMul,
+                TokenKind::OpSub,
+                TokenKind::OpMod,
+                TokenKind::Equal
             ]
         );
 
