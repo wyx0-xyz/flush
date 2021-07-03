@@ -119,7 +119,7 @@ impl Lexer {
                 None => break,
             };
 
-            if current.is_ascii_alphanumeric() {
+            if current == '_' || current.is_ascii_alphanumeric() {
                 identifier.push(current);
                 self.advance();
             } else {
@@ -161,7 +161,7 @@ impl Lexer {
             '#' => self.skip_comment(),
             '\n' => self.line += 1,
             _ if character.is_ascii_digit() => self.parse_number(),
-            _ if character.is_ascii_alphanumeric() => self.parse_identifier(),
+            '_' | _ if character.is_ascii_alphanumeric() => self.parse_identifier(),
             _ => (),
         };
 
