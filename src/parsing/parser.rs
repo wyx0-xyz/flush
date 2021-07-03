@@ -6,7 +6,7 @@ use crate::lexing::typing::{Token, TokenKind};
 pub struct Parser {
     tokens: Vec<Token>,
     file: String,
-    output: Vec<Statement>,
+    statements: Vec<Statement>,
     position: usize,
 }
 
@@ -20,6 +20,6 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Vec<Statement>> {
-        Ok(self.output.clone())
+        Ok(self.statements.clone())
     }
 }
