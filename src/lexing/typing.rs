@@ -18,7 +18,7 @@ pub enum TokenKind {
     Boolean(bool),  // false
     Ident(String),  // user
     Op(Op),         // + - * / %
-    Equal,          // =
+    Assign,          // =
 }
 
 #[derive(Clone, Debug, PartialEq)]

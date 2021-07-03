@@ -160,7 +160,7 @@ impl Lexer {
             '*' => self.push_token(TokenKind::Op(Op::Mul)),
             '/' => self.push_token(TokenKind::Op(Op::Div)),
             '%' => self.push_token(TokenKind::Op(Op::Mod)),
-            '=' => self.push_token(TokenKind::Equal),
+            '=' => self.push_token(TokenKind::Assign),
             '"' => self.parse_string()?,
             '#' => self.skip_comment(),
             '\n' => self.line += 1,
@@ -293,7 +293,7 @@ mod test {
                 TokenKind::Op(Op::Mul),
                 TokenKind::Op(Op::Sub),
                 TokenKind::Op(Op::Mod),
-                TokenKind::Equal
+                TokenKind::Assign
             ]
         );
 
