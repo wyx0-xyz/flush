@@ -8,6 +8,8 @@ pub enum TokenKind {
     RBracket,       // ]
     Colon,          // :
     Comma,          // ,
+    If,             // if
+    Else,           // else
     Def,            // def
     Return,         // return
     String(String), // "Hello, World!"

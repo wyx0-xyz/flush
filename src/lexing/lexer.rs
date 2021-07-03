@@ -128,6 +128,8 @@ impl Lexer {
         }
 
         let token = match identifier.as_str() {
+            "if" => TokenKind::If,
+            "else" => TokenKind::Else,
             "def" => TokenKind::Def,
             "return" => TokenKind::Return,
             "true" => TokenKind::Boolean(true),
@@ -259,10 +261,15 @@ mod test {
 
     #[test]
     fn keywords() -> Result<()> {
-        let mut lexer = Lexer::new("def false user true return user_id".to_string(), "__test__");
+        let mut lexer = Lexer::new(
+            "if else def false user true return user_id".to_string(),
+            "__test__",
+        );
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
+                TokenKind::If,
+                TokenKind::Else,
                 TokenKind::Def,
                 TokenKind::Boolean(false),
                 TokenKind::Ident("user".to_string()),
