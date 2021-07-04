@@ -39,7 +39,12 @@ impl Parser {
 
     fn expect(&mut self, expected: TokenKind) -> Result<Token> {
         if self.is_at_end() {
-            panic!("Reach end of the file");
+            return Err(FlushError(
+                self.file.clone(),
+                self.current().line,
+                format!("Expected {:?} found nothing", expected),
+                None,
+            ));
         }
 
         self.position += 1;
