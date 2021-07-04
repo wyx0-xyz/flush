@@ -160,7 +160,30 @@ impl Lexer {
             '*' => self.push_token(TokenKind::Op(Op::Mul)),
             '/' => self.push_token(TokenKind::Op(Op::Div)),
             '%' => self.push_token(TokenKind::Op(Op::Mod)),
-            '=' => self.push_token(TokenKind::Assign),
+            '<' => {
+                if self.current() == Some('=') {
+                    self.push_token(TokenKind::Op(Op::Le));
+                    self.position += 1;
+                } else {
+                    self.push_token(TokenKind::Op(Op::Lt));
+                }
+            }
+            '>' => {
+                if self.current() == Some('=') {
+                    self.push_token(TokenKind::Op(Op::Ge));
+                    self.position += 1;
+                } else {
+                    self.push_token(TokenKind::Op(Op::Gt));
+                }
+            }
+            '=' => {
+                if self.current() == Some('=') {
+                    self.push_token(TokenKind::Op(Op::Eq));
+                    self.position += 1;
+                } else {
+                    self.push_token(TokenKind::Assign);
+                }
+            }
             '"' => self.parse_string()?,
             '#' => self.skip_comment(),
             '\n' => self.line += 1,
@@ -284,7 +307,7 @@ mod test {
 
     #[test]
     fn operators() -> Result<()> {
-        let mut lexer = Lexer::new("+ / * - % =".to_string(), "__test__");
+        let mut lexer = Lexer::new("+ / * - % = < >= == <=".to_string(), "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
@@ -293,7 +316,11 @@ mod test {
                 TokenKind::Op(Op::Mul),
                 TokenKind::Op(Op::Sub),
                 TokenKind::Op(Op::Mod),
-                TokenKind::Assign
+                TokenKind::Assign,
+                TokenKind::Op(Op::Lt),
+                TokenKind::Op(Op::Ge),
+                TokenKind::Op(Op::Eq),
+                TokenKind::Op(Op::Le),
             ]
         );
 
