@@ -23,20 +23,20 @@ pub enum TokenKind {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Op {
-    Add,    // +
-    Sub,    // -
-    Mul,    // *
-    Div,    // /
-    Mod,    // %
-    Lt,     // <
-    Gt,     // >
-    Eq,     // ==
-    Le,     // <=
-    Ge,     // >=
+    Add, // +
+    Sub, // -
+    Mul, // *
+    Div, // /
+    Mod, // %
+    Lt,  // <
+    Gt,  // >
+    Eq,  // ==
+    Le,  // <=
+    Ge,  // >=
 }
 
 #[derive(Clone, Debug)]
 pub struct Token {
     pub line: usize,
-    pub kind: TokenKind
+    pub kind: TokenKind,
 }
