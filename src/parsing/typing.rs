@@ -25,4 +25,9 @@ pub enum BinOp {
     Mul(Box<Expr>, Box<Expr>),
     Div(Box<Expr>, Box<Expr>),
     Mod(Box<Expr>, Box<Expr>),
+    Lt(Box<Expr>, Box<Expr>),
+    Gt(Box<Expr>, Box<Expr>),
+    Eq(Box<Expr>, Box<Expr>),
+    Le(Box<Expr>, Box<Expr>),
+    Ge(Box<Expr>, Box<Expr>),
 }
