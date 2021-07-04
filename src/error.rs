@@ -15,7 +15,7 @@ impl fmt::Display for FlushError {
             Yellow.paint(self.1.to_string()),
             Red.paint("error"),
             self.2
-        );
+        )?;
 
         match self.3.clone() {
             Some(note) => write!(f, "\n{}: {}", Yellow.paint("note"), note),
