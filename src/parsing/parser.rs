@@ -267,6 +267,7 @@ impl Parser {
                     }
                 }
             }
+            TokenKind::LBracket => self.parse_list()?,
             unexpected => {
                 return Err(FlushError(
                     self.file.clone(),
@@ -290,6 +291,23 @@ impl Parser {
         })
     }
 
+    fn parse_list(&mut self) -> Result<Expr> {
+        let mut expressions: Vec<Box<Expr>> = vec![];
+
+        while !self.is_at_end() && self.current().kind != TokenKind::RBracket {
+            expressions.push(Box::new(self.parse_expr()?));
+
+            if self.current().kind == TokenKind::RBracket {
+                self.position += 1;
+                break;
+            }
+
+            self.expect(TokenKind::Comma)?;
+        }
+
+        Ok(Expr::List(expressions))
+    }
+
     fn parse_bin_op(&mut self, expr: Expr, bin_op: Op) -> Result<Expr> {
         Ok(Expr::BinOp(match bin_op {
             Op::Add => BinOp::Add(Box::new(expr), Box::new(self.parse_expr()?)),
@@ -310,8 +328,7 @@ impl Parser {
         let mut args: Vec<Box<Expr>> = vec![];
 
         while !self.is_at_end() && self.current().kind != TokenKind::RParen {
-            let expr = self.parse_expr()?;
-            args.push(Box::new(expr));
+            args.push(Box::new(self.parse_expr()?));
 
             if self.current().kind == TokenKind::RParen {
                 self.position += 1;

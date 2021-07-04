@@ -15,6 +15,7 @@ pub enum Expr {
     Boolean(bool),                // false
     Var(String),                  // userId
     Call(String, Vec<Box<Expr>>), // printLn(...)
+    List(Vec<Box<Expr>>),         // [1, 2, 3]
     BinOp(BinOp),
 }
 
