@@ -15,7 +15,7 @@ pub enum Expr {
     Boolean(bool),
     Var(String),
     Call(String, Vec<Box<Expr>>),
-    BinOp(BinOp)
+    BinOp(BinOp),
 }
 
 #[derive(Clone, Debug)]
