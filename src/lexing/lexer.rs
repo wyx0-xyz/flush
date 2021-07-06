@@ -104,7 +104,7 @@ impl Lexer {
             }
         }
 
-        match raw_number.parse::<u32>() {
+        match raw_number.parse::<i32>() {
             Ok(int) => self.push_token(TokenKind::Int(int)),
             Err(_) => self.push_token(TokenKind::Float(raw_number.parse::<f32>().unwrap())),
         }

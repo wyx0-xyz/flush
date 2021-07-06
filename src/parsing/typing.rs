@@ -10,7 +10,7 @@ pub enum Statement {
 #[derive(Clone, Debug)]
 pub enum Expr {
     String(String),               // "Hello, flush!"
-    Int(u32),                     // 32
+    Int(i32),                     // -32
     Float(f32),                   // 18.25
     Boolean(bool),                // false
     Var(String),                  // userId

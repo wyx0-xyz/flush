@@ -13,7 +13,7 @@ pub enum TokenKind {
     Def,            // def
     Return,         // return
     String(String), // "Hello, World!"
-    Int(u32),       // 42
+    Int(i32),       // 42
     Float(f32),     // 3.14
     Boolean(bool),  // false
     Ident(String),  // user
