@@ -10,7 +10,7 @@ pub enum Value {
 }
 
 #[derive(PartialEq)]
-pub enum ScopeState {
+pub enum ScopeContext {
     Definition,
     TopLevel
 }
