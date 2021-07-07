@@ -4,7 +4,7 @@ use std::fmt;
 pub enum Value {
     String(String),
     Int(i32),
-    Float(f32),
+    Float(f64),
     Boolean(bool),
     None
 }
