@@ -11,6 +11,6 @@ flush-lang is an interpreted programming language written in Rust.
 
 ```
 def main() {
-    printLn("Hello, World!")
+    putStrln("Hello, World!")
 }
 ```
