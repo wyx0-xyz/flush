@@ -11,7 +11,7 @@ pub enum Statement {
 pub enum Expr {
     String(String),               // "Hello, flush!"
     Int(i32),                     // -32
-    Float(f32),                   // 18.25
+    Float(f64),                   // 18.25
     Boolean(bool),                // false
     Var(String),                  // userId
     Call(String, Vec<Box<Expr>>), // printLn(...)

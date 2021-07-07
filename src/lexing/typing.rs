@@ -14,7 +14,7 @@ pub enum TokenKind {
     Return,         // return
     String(String), // "Hello, World!"
     Int(i32),       // 42
-    Float(f32),     // 3.14
+    Float(f64),     // 3.14
     Boolean(bool),  // false
     Ident(String),  // user
     Op(Op),         // + - * / %
