@@ -11,9 +11,9 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(program: String, file: impl ToString) -> Self {
+    pub fn new(program: impl ToString, file: impl ToString) -> Self {
         Self {
-            program,
+            program: program.to_string(),
             file: file.to_string(),
             line: 1,
             ..Default::default()
@@ -216,7 +216,7 @@ mod test {
 
     #[test]
     fn single_line_comment() -> Result<()> {
-        let mut lexer = Lexer::new("# hello, world\n#lorem".to_string(), "__test__");
+        let mut lexer = Lexer::new("# hello, world\n#lorem", "__test__");
         assert_eq!(get_types(lexer.tokenize()?), vec![]);
 
         Ok(())
@@ -224,7 +224,7 @@ mod test {
 
     #[test]
     fn parentheses_braces_brackets() -> Result<()> {
-        let mut lexer = Lexer::new("( } [ ) { ]".to_string(), "__test__");
+        let mut lexer = Lexer::new("( } [ ) { ]", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
@@ -242,7 +242,7 @@ mod test {
 
     #[test]
     fn punctuation() -> Result<()> {
-        let mut lexer = Lexer::new(", :".to_string(), "__test__");
+        let mut lexer = Lexer::new(", :", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![TokenKind::Comma, TokenKind::Colon]
@@ -253,7 +253,7 @@ mod test {
 
     #[test]
     fn string() -> Result<()> {
-        let mut lexer = Lexer::new(r#""Hello, World!""#.to_string(), "__test__");
+        let mut lexer = Lexer::new(r#""Hello, World!""#, "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![TokenKind::String("Hello, World!".to_string())]
@@ -264,7 +264,7 @@ mod test {
 
     #[test]
     fn unclosed_string() {
-        let mut lexer = Lexer::new(r#""Hello flush"#.to_string(), "__test__");
+        let mut lexer = Lexer::new(r#""Hello flush"#, "__test__");
         match lexer.tokenize() {
             Ok(_) => panic!(),
             Err(e) => assert_eq!(e.2, "Unterminated string"),
@@ -273,7 +273,7 @@ mod test {
 
     #[test]
     fn numbers() -> Result<()> {
-        let mut lexer = Lexer::new("32 18.25".to_string(), "__test__");
+        let mut lexer = Lexer::new("32 18.25", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![TokenKind::Int(32), TokenKind::Float(18.25)]
@@ -285,7 +285,7 @@ mod test {
     #[test]
     fn keywords() -> Result<()> {
         let mut lexer = Lexer::new(
-            "if else def false user true return user_id".to_string(),
+            "if else def false user true return user_id",
             "__test__",
         );
         assert_eq!(
@@ -307,7 +307,7 @@ mod test {
 
     #[test]
     fn operators() -> Result<()> {
-        let mut lexer = Lexer::new("+ / * - % = < >= == <=".to_string(), "__test__");
+        let mut lexer = Lexer::new("+ / * - % = < >= == <=", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
