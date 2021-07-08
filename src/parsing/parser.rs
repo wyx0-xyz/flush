@@ -309,17 +309,21 @@ impl Parser {
     }
 
     fn parse_bin_op(&mut self, expr: Expr, bin_op: Op) -> Result<Expr> {
+        let boxed_expr = Box::new(expr);
+        let parsed_expr = Box::new(self.parse_expr()?);
+
         Ok(Expr::BinOp(match bin_op {
-            Op::Add => BinOp::Add(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Sub => BinOp::Sub(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Mul => BinOp::Mul(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Div => BinOp::Div(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Mod => BinOp::Mod(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Lt => BinOp::Lt(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Gt => BinOp::Gt(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Eq => BinOp::Eq(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Le => BinOp::Le(Box::new(expr), Box::new(self.parse_expr()?)),
-            Op::Ge => BinOp::Ge(Box::new(expr), Box::new(self.parse_expr()?)),
+            Op::Add => BinOp::Add(boxed_expr, parsed_expr),
+            Op::Sub => BinOp::Sub(boxed_expr, parsed_expr),
+            Op::Mul => BinOp::Mul(boxed_expr, parsed_expr),
+            Op::Div => BinOp::Div(boxed_expr, parsed_expr),
+            Op::Mod => BinOp::Mod(boxed_expr, parsed_expr),
+            Op::Lt => BinOp::Lt(boxed_expr, parsed_expr),
+            Op::Gt => BinOp::Gt(boxed_expr, parsed_expr),
+            Op::Eq => BinOp::Eq(boxed_expr, parsed_expr),
+            Op::Ne => BinOp::Ne(boxed_expr, parsed_expr),
+            Op::Le => BinOp::Le(boxed_expr, parsed_expr),
+            Op::Ge => BinOp::Ge(boxed_expr, parsed_expr),
             _ => unreachable!(),
         }))
     }
@@ -343,10 +347,8 @@ impl Parser {
 
     pub fn parse(&mut self) -> Result<Vec<Statement>> {
         while !self.is_at_end() {
-            match self.parse_statement() {
-                Ok(statement) => self.statements.push(statement),
-                Err(e) => return Err(e),
-            };
+            let statement = self.parse_statement()?;
+            self.statements.push(statement.clone());
         }
 
         Ok(self.statements.clone())

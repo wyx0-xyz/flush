@@ -29,6 +29,7 @@ pub enum BinOp {
     Lt(Box<Expr>, Box<Expr>),  // <
     Gt(Box<Expr>, Box<Expr>),  // >
     Eq(Box<Expr>, Box<Expr>),  // ==
+    Ne(Box<Expr>, Box<Expr>),  // /=
     Le(Box<Expr>, Box<Expr>),  // <=
     Ge(Box<Expr>, Box<Expr>),  // >=
 }

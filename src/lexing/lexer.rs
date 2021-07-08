@@ -158,7 +158,14 @@ impl Lexer {
             '+' => self.push_token(TokenKind::Op(Op::Add)),
             '-' => self.push_token(TokenKind::Op(Op::Sub)),
             '*' => self.push_token(TokenKind::Op(Op::Mul)),
-            '/' => self.push_token(TokenKind::Op(Op::Div)),
+            '/' => {
+                if self.current() == Some('=') {
+                    self.push_token(TokenKind::Op(Op::Ne));
+                    self.position += 1;
+                } else {
+                    self.push_token(TokenKind::Op(Op::Div))
+                }
+            }
             '%' => self.push_token(TokenKind::Op(Op::Mod)),
             '<' => {
                 if self.current() == Some('=') {
@@ -223,29 +230,20 @@ mod test {
     }
 
     #[test]
-    fn parentheses_braces_brackets() -> Result<()> {
-        let mut lexer = Lexer::new("( } [ ) { ]", "__test__");
+    fn punctuation() -> Result<()> {
+        let mut lexer = Lexer::new("() {} [] , :", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
                 TokenKind::LParen,
-                TokenKind::RBrace,
-                TokenKind::LBracket,
                 TokenKind::RParen,
                 TokenKind::LBrace,
-                TokenKind::RBracket
+                TokenKind::RBrace,
+                TokenKind::LBracket,
+                TokenKind::RBracket,
+                TokenKind::Comma,
+                TokenKind::Colon
             ]
-        );
-
-        Ok(())
-    }
-
-    #[test]
-    fn punctuation() -> Result<()> {
-        let mut lexer = Lexer::new(", :", "__test__");
-        assert_eq!(
-            get_types(lexer.tokenize()?),
-            vec![TokenKind::Comma, TokenKind::Colon]
         );
 
         Ok(())
@@ -284,10 +282,7 @@ mod test {
 
     #[test]
     fn keywords() -> Result<()> {
-        let mut lexer = Lexer::new(
-            "if else def false user true return user_id",
-            "__test__",
-        );
+        let mut lexer = Lexer::new("if else def false user true return user_id", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
@@ -307,20 +302,22 @@ mod test {
 
     #[test]
     fn operators() -> Result<()> {
-        let mut lexer = Lexer::new("+ / * - % = < >= == <=", "__test__");
+        let mut lexer = Lexer::new("+ - * / % < > == /= <= >= =", "__test__");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
                 TokenKind::Op(Op::Add),
-                TokenKind::Op(Op::Div),
-                TokenKind::Op(Op::Mul),
                 TokenKind::Op(Op::Sub),
+                TokenKind::Op(Op::Mul),
+                TokenKind::Op(Op::Div),
                 TokenKind::Op(Op::Mod),
-                TokenKind::Assign,
                 TokenKind::Op(Op::Lt),
-                TokenKind::Op(Op::Ge),
+                TokenKind::Op(Op::Gt),
                 TokenKind::Op(Op::Eq),
+                TokenKind::Op(Op::Ne),
                 TokenKind::Op(Op::Le),
+                TokenKind::Op(Op::Ge),
+                TokenKind::Assign,
             ]
         );
 

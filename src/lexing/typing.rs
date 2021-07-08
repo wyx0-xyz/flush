@@ -17,7 +17,7 @@ pub enum TokenKind {
     Float(f64),     // 3.14
     Boolean(bool),  // false
     Ident(String),  // user
-    Op(Op),         // + - * / %
+    Op(Op),         // + - * / % < > == /= <= >=
     Assign,         // =
 }
 
@@ -31,6 +31,7 @@ pub enum Op {
     Lt,  // <
     Gt,  // >
     Eq,  // ==
+    Ne,  // /=
     Le,  // <=
     Ge,  // >=
 }
