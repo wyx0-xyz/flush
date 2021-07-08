@@ -1,4 +1,4 @@
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     If(Expr, Vec<Box<Statement>>, Vec<Box<Statement>>), // if (...) { ... }
     VarDef(String, Expr),                               // def user_id = ...
@@ -7,7 +7,7 @@ pub enum Statement {
     Expr(Expr),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
     String(String),               // "Hello, flush!"
     Int(i32),                     // -32
@@ -19,7 +19,7 @@ pub enum Expr {
     BinOp(BinOp),
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum BinOp {
     Add(Box<Expr>, Box<Expr>), // +
     Sub(Box<Expr>, Box<Expr>), // -

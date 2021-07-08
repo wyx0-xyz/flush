@@ -354,3 +354,104 @@ impl Parser {
         Ok(self.statements.clone())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::Parser;
+    use crate::error::Result;
+    use crate::lexing::lexer::Lexer;
+    use crate::parsing::typing::*;
+
+    #[test]
+    fn control_flow() -> Result<()> {
+        let mut parser = Parser::new(
+            Lexer::new("if (true) {} else {} ", "__test__").tokenize()?,
+            "__test__",
+        );
+
+        assert_eq!(
+            parser.parse()?,
+            vec![Statement::If(Expr::Boolean(true), vec![], vec![])]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn var_def() -> Result<()> {
+        let mut parser = Parser::new(
+            Lexer::new(r#"def username = "wyxo""#, "__test__").tokenize()?,
+            "__test__",
+        );
+
+        assert_eq!(
+            parser.parse()?,
+            vec![Statement::VarDef(
+                "username".to_string(),
+                Expr::String("wyxo".to_string())
+            )]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn func_def_return() -> Result<()> {
+        let mut parser = Parser::new(
+            Lexer::new(r#"def add(a, b) { return a + b }"#, "__test__").tokenize()?,
+            "__test__",
+        );
+
+        assert_eq!(
+            parser.parse()?,
+            vec![Statement::FuncDef(
+                "add".to_string(),
+                vec!["a".to_string(), "b".to_string()],
+                vec![Statement::Return(Expr::BinOp(BinOp::Add(
+                    Box::new(Expr::Var("a".to_string())),
+                    Box::new(Expr::Var("b".to_string()))
+                )))]
+            )]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn expressions() -> Result<()> {
+        let mut parser = Parser::new(
+            Lexer::new(
+                r#""Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
+                "__test__",
+            )
+            .tokenize()?,
+            "__test__",
+        );
+
+        assert_eq!(
+            parser.parse()?,
+            vec![
+                Statement::Expr(Expr::String("Hello, Flush!".to_string()),),
+                Statement::Expr(Expr::Int(54)),
+                Statement::Expr(Expr::Float(3.14)),
+                Statement::Expr(Expr::Boolean(false)),
+                Statement::Expr(Expr::Var("user".to_string())),
+                Statement::Expr(Expr::Call(
+                    "add".to_string(),
+                    vec![
+                        Box::new(Expr::Int(1)),
+                        Box::new(Expr::Boolean(true)),
+                        Box::new(Expr::Float(4.))
+                    ]
+                )),
+                Statement::Expr(Expr::List(vec![
+                    Box::new(Expr::Int(1)),
+                    Box::new(Expr::Var("user".to_string())),
+                    Box::new(Expr::Call("sin".to_string(), vec![Box::new(Expr::Int(28))]))
+                ]))
+            ]
+        );
+
+        Ok(())
+    }
+}
