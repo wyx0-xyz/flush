@@ -69,7 +69,7 @@ impl Parser {
 
     fn parse_statement(&mut self) -> Result<Statement> {
         Ok(match self.advance().unwrap().kind {
-            TokenKind::If => self.parse_controll_flow()?,
+            TokenKind::If => self.parse_control_flow()?,
             TokenKind::Def => self.parse_def()?,
             TokenKind::Return => self.parse_return()?,
             unknow => {
@@ -89,7 +89,7 @@ impl Parser {
         })
     }
 
-    fn parse_controll_flow(&mut self) -> Result<Statement> {
+    fn parse_control_flow(&mut self) -> Result<Statement> {
         self.expect(TokenKind::LParen)?;
 
         let condition = self.parse_expr()?;
