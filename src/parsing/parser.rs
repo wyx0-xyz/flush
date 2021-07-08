@@ -132,7 +132,7 @@ impl Parser {
                 kind => {
                     return Err(FlushError(
                         self.file.clone(),
-                        self.current().line,
+                        token.line,
                         format!("Expected identifier found '{:?}'", kind),
                         None,
                     ))
@@ -141,7 +141,7 @@ impl Parser {
             _ => {
                 return Err(FlushError(
                     self.file.clone(),
-                    self.current().line,
+                    self.previous().line,
                     "Expected identifier".to_string(),
                     None,
                 ))
@@ -153,7 +153,7 @@ impl Parser {
             None => {
                 return Err(FlushError(
                     self.file.clone(),
-                    self.current().line,
+                    self.previous().line,
                     "Unexpected token def".to_string(),
                     None,
                 ))
@@ -188,7 +188,7 @@ impl Parser {
                 unexpected => {
                     return Err(FlushError(
                         self.file.clone(),
-                        self.current().line,
+                        self.previous().line,
                         format!("Unexpected token '{:?}'", unexpected),
                         None,
                     ))
@@ -213,7 +213,7 @@ impl Parser {
                 None => {
                     return Err(FlushError(
                         self.file.clone(),
-                        self.current().line,
+                        self.previous().line,
                         "Unfinished function body".to_string(),
                         Some("Add }".to_string()),
                     ))
@@ -242,7 +242,7 @@ impl Parser {
             unexpected => {
                 return Err(FlushError(
                     self.file.clone(),
-                    self.current().line,
+                    self.previous().line,
                     format!("Expected expression found '{:?}'", unexpected),
                     None,
                 ))
@@ -271,7 +271,7 @@ impl Parser {
             unexpected => {
                 return Err(FlushError(
                     self.file.clone(),
-                    self.current().line,
+                    next.line,
                     format!("Expected expression found '{:?}'", unexpected),
                     None,
                 ))
