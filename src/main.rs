@@ -4,6 +4,7 @@ mod lexing;
 mod parsing;
 
 use clap::{App, Arg};
+use interpreting::interpreter::Interpreter;
 use lexing::lexer::Lexer;
 use parsing::parser::Parser;
 use std::{fs, path};
@@ -36,13 +37,15 @@ fn main() {
         Err(e) => return eprintln!("{}", e),
     };
 
-    println!("Tokens: {:?}", tokens);
-
     let mut parser = Parser::new(tokens, file_path.to_str().unwrap_or(""));
     let statements = match parser.parse() {
         Ok(statements) => statements,
         Err(e) => return eprintln!("{}", e),
     };
 
-    println!("Statements: {:?}", statements);
+    let mut interpreter = Interpreter::new(statements);
+    match interpreter.interpret() {
+        Ok(()) => (),
+        Err(e) => return eprintln!("{}", e),
+    };
 }
