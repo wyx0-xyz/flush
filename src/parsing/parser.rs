@@ -312,20 +312,24 @@ impl Parser {
         let boxed_expr = Box::new(expr);
         let parsed_expr = Box::new(self.parse_expr()?);
 
-        Ok(Expr::BinOp(match bin_op {
-            Op::Add => BinOp::Add(boxed_expr, parsed_expr),
-            Op::Sub => BinOp::Sub(boxed_expr, parsed_expr),
-            Op::Mul => BinOp::Mul(boxed_expr, parsed_expr),
-            Op::Div => BinOp::Div(boxed_expr, parsed_expr),
-            Op::Mod => BinOp::Mod(boxed_expr, parsed_expr),
-            Op::Lt => BinOp::Lt(boxed_expr, parsed_expr),
-            Op::Gt => BinOp::Gt(boxed_expr, parsed_expr),
-            Op::Eq => BinOp::Eq(boxed_expr, parsed_expr),
-            Op::Ne => BinOp::Ne(boxed_expr, parsed_expr),
-            Op::Le => BinOp::Le(boxed_expr, parsed_expr),
-            Op::Ge => BinOp::Ge(boxed_expr, parsed_expr),
-            _ => unreachable!(),
-        }))
+        Ok(Expr::BinOp(
+            match bin_op {
+                Op::Add => BinOp::Add,
+                Op::Sub => BinOp::Sub,
+                Op::Mul => BinOp::Mul,
+                Op::Div => BinOp::Div,
+                Op::Mod => BinOp::Mod,
+                Op::Lt => BinOp::Lt,
+                Op::Gt => BinOp::Gt,
+                Op::Eq => BinOp::Eq,
+                Op::Ne => BinOp::Ne,
+                Op::Le => BinOp::Le,
+                Op::Ge => BinOp::Ge,
+                _ => unreachable!(),
+            },
+            boxed_expr,
+            parsed_expr,
+        ))
     }
 
     fn parse_func_call(&mut self, id: String) -> Result<Expr> {
@@ -407,10 +411,11 @@ mod test {
             vec![Statement::FuncDef(
                 "add".to_string(),
                 vec!["a".to_string(), "b".to_string()],
-                vec![Statement::Return(Expr::BinOp(BinOp::Add(
+                vec![Statement::Return(Expr::BinOp(
+                    BinOp::Add,
                     Box::new(Expr::Var("a".to_string())),
                     Box::new(Expr::Var("b".to_string()))
-                )))]
+                ))]
             )]
         );
 
