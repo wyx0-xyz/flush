@@ -79,7 +79,7 @@ impl Parser {
                     _ => {
                         return Err(FlushError(
                             self.file.clone(),
-                            self.current().line,
+                            self.previous().line,
                             format!("Unknow statement {:?}", unknow),
                             None,
                         ));
@@ -339,12 +339,13 @@ impl Parser {
             args.push(Box::new(self.parse_expr()?));
 
             if self.current().kind == TokenKind::RParen {
-                self.position += 1;
                 break;
             }
 
             self.expect(TokenKind::Comma)?;
         }
+
+        self.expect(TokenKind::RParen)?;
 
         Ok(Expr::Call(id, args))
     }
