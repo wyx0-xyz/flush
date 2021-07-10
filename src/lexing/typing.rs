@@ -23,17 +23,18 @@ pub enum TokenKind {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Op {
-    Add, // +
-    Sub, // -
-    Mul, // *
-    Div, // /
-    Mod, // %
-    Lt,  // <
-    Gt,  // >
-    Eq,  // ==
-    Ne,  // /=
-    Le,  // <=
-    Ge,  // >=
+    Add,    // +
+    Sub,    // -
+    Mul,    // *
+    Div,    // /
+    Mod,    // %
+    Square, // ^
+    Lt,     // <
+    Gt,     // >
+    Eq,     // ==
+    Ne,     // /=
+    Le,     // <=
+    Ge,     // >=
 }
 
 #[derive(Clone, Debug)]

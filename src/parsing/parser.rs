@@ -319,6 +319,7 @@ impl Parser {
                 Op::Mul => BinOp::Mul,
                 Op::Div => BinOp::Div,
                 Op::Mod => BinOp::Mod,
+                Op::Square => BinOp::Square,
                 Op::Lt => BinOp::Lt,
                 Op::Gt => BinOp::Gt,
                 Op::Eq => BinOp::Eq,
