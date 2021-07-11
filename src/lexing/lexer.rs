@@ -262,7 +262,7 @@ mod test {
     }
 
     #[test]
-    fn unclosed_string() {
+    fn unterminated_string() {
         let mut lexer = Lexer::new(r#""Hello flush"#, "__test__");
         match lexer.tokenize() {
             Ok(_) => panic!(),
