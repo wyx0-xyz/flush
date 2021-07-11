@@ -70,12 +70,12 @@ impl Interpreter {
         self.stack.pop();
     }
 
-    pub fn eval_statement(&mut self, statement: Statement) -> Result<(), String> {
-        match statement {
-            Statement::VarDef(id, literal) => self.eval_var_def(id, literal),
-            Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements),
+    pub fn eval_statement(&mut self, statement: Statement) -> Result<Option<Literal>, String> {
+        Ok(match statement {
+            Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
+            Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
             Statement::If(condition, body, else_body) => {
-                self.eval_control_flow(condition, body, else_body)
+                self.eval_control_flow(condition, body, else_body)?
             }
             Statement::Expr(expr) => {
                 if self.context == ScopeContext::TopLevel {
@@ -83,13 +83,13 @@ impl Interpreter {
                 }
 
                 self.get_literal(expr)?;
-                Ok(())
+                None
             }
-            _ => Ok(()),
-        }
+            _ => None,
+        })
     }
 
-    fn eval_var_def(&mut self, id: String, expr: Expr) -> Result<(), String> {
+    fn eval_var_def(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
         if self.stack.last().unwrap().contains_key(&id) {
             return Err(format!("Variable {} already exists!", id));
         }
@@ -97,7 +97,7 @@ impl Interpreter {
         let literal = self.get_literal(expr)?;
         self.push(id, literal);
 
-        Ok(())
+        Ok(None)
     }
 
     fn eval_func_def(
@@ -105,7 +105,7 @@ impl Interpreter {
         id: String,
         args: Vec<String>,
         statements: Vec<Statement>,
-    ) -> Result<(), String> {
+    ) -> Result<Option<Literal>, String> {
         self.push(
             id.clone(),
             Literal::Function(id.clone(), args, statements.clone()),
@@ -115,7 +115,7 @@ impl Interpreter {
             self.eval_call(id.clone(), vec![])?;
         }
 
-        Ok(())
+        Ok(None)
     }
 
     fn eval_control_flow(
@@ -123,10 +123,14 @@ impl Interpreter {
         condition: Expr,
         if_body: Vec<Box<Statement>>,
         else_body: Vec<Box<Statement>>,
-    ) -> Result<(), String> {
+    ) -> Result<Option<Literal>, String> {
         match self.get_literal(condition) {
             Ok(Literal::Boolean(boolean)) => {
                 for statement in if boolean { if_body } else { else_body } {
+                    if let Statement::Return(expr) = *statement.clone() {
+                        return Ok(Some(self.get_literal(expr)?));
+                    }
+
                     self.eval_statement(*statement)?;
                 }
             }
@@ -138,7 +142,8 @@ impl Interpreter {
             }
             Err(e) => return Err(e),
         }
-        Ok(())
+
+        Ok(None)
     }
 
     pub fn get_literal(&mut self, expr: Expr) -> Result<Literal, String> {
@@ -179,13 +184,9 @@ impl Interpreter {
                         let mut return_literal = Literal::None;
 
                         for statement in statements.clone() {
-                            if let Statement::Return(expr) = statement {
-                                let literal = self.get_literal(expr)?;
+                            if let Some(literal) = self.eval_statement(statement)? {
                                 return_literal = literal;
-
                                 break;
-                            } else {
-                                self.eval_statement(statement)?;
                             }
                         }
 
