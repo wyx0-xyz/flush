@@ -74,6 +74,7 @@ impl Interpreter {
         Ok(match statement {
             Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
             Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
+            Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -85,7 +86,6 @@ impl Interpreter {
                 self.get_literal(expr)?;
                 None
             }
-            _ => None,
         })
     }
 
