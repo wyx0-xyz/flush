@@ -395,7 +395,7 @@ mod test {
     }
 
     #[test]
-    fn func_def_return() -> Result<()> {
+    fn func_def() -> Result<()> {
         let mut parser = Parser::new(
             Lexer::new(r#"def add(a, b) { return a + b }"#, "__test__").tokenize()?,
             "__test__",
@@ -413,6 +413,21 @@ mod test {
                 ))]
             )]
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn unterminated_func_def() -> Result<()> {
+        let mut parser = Parser::new(
+            Lexer::new("def f(x) { return x * x", "__test__").tokenize()?,
+            "__test__",
+        );
+
+        match parser.parse() {
+            Ok(_) => panic!(),
+            Err(e) => assert_eq!(e.2, "Expected RBrace found nothing".to_string()),
+        };
 
         Ok(())
     }
