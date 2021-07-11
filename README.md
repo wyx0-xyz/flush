@@ -9,7 +9,7 @@ flush-lang is an interpreted programming language written in Rust.
 
 ## Hello World
 
-```
+```scala
 def main() {
     putStrln("Hello, World!")
 }
