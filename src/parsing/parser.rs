@@ -5,17 +5,17 @@ use crate::lexing::typing::*;
 #[derive(Default)]
 pub struct Parser {
     tokens: Vec<Token>,
-    file: String,
+    file_path: String,
     statements: Vec<Statement>,
     position: usize,
 }
 
 #[allow(unreachable_patterns)]
 impl Parser {
-    pub fn new(tokens: Vec<Token>, file: impl ToString) -> Self {
+    pub fn new(tokens: Vec<Token>, file_path: impl ToString) -> Self {
         Self {
             tokens,
-            file: file.to_string(),
+            file_path: file_path.to_string(),
             ..Default::default()
         }
     }
@@ -40,7 +40,7 @@ impl Parser {
     fn expect(&mut self, expected: TokenKind) -> Result<Token> {
         if self.is_at_end() {
             return Err(FlushError(
-                self.file.clone(),
+                self.file_path.clone(),
                 self.previous().line,
                 format!("Expected {:?} found nothing", expected),
                 None,
@@ -53,7 +53,7 @@ impl Parser {
 
         if next.kind != expected {
             return Err(FlushError(
-                self.file.clone(),
+                self.file_path.clone(),
                 next.line,
                 format!("Unexpected token {:?}", next.kind),
                 Some(format!("Expected {:?}", expected)),
@@ -78,7 +78,7 @@ impl Parser {
                     Ok(expr) => Statement::Expr(expr),
                     _ => {
                         return Err(FlushError(
-                            self.file.clone(),
+                            self.file_path.clone(),
                             self.previous().line,
                             format!("Unknow statement {:?}", unknow),
                             None,
@@ -131,7 +131,7 @@ impl Parser {
                 TokenKind::Ident(id) => id,
                 kind => {
                     return Err(FlushError(
-                        self.file.clone(),
+                        self.file_path.clone(),
                         token.line,
                         format!("Expected identifier found '{:?}'", kind),
                         None,
@@ -140,7 +140,7 @@ impl Parser {
             },
             _ => {
                 return Err(FlushError(
-                    self.file.clone(),
+                    self.file_path.clone(),
                     self.previous().line,
                     "Expected identifier".to_string(),
                     None,
@@ -152,7 +152,7 @@ impl Parser {
             Some(token) => token,
             None => {
                 return Err(FlushError(
-                    self.file.clone(),
+                    self.file_path.clone(),
                     self.previous().line,
                     "Unexpected token def".to_string(),
                     None,
@@ -165,7 +165,7 @@ impl Parser {
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
-                    self.file.clone(),
+                    self.file_path.clone(),
                     token.line,
                     format!("Unexpected token: {:?}", unexpected),
                     None,
@@ -182,7 +182,7 @@ impl Parser {
                 TokenKind::Ident(id) => args.push(id),
                 unexpected => {
                     return Err(FlushError(
-                        self.file.clone(),
+                        self.file_path.clone(),
                         self.previous().line,
                         format!("Unexpected token '{:?}'", unexpected),
                         None,
@@ -207,7 +207,7 @@ impl Parser {
                 Some(token) => token,
                 None => {
                     return Err(FlushError(
-                        self.file.clone(),
+                        self.file_path.clone(),
                         self.previous().line,
                         "Unfinished function body".to_string(),
                         Some("Add }".to_string()),
@@ -234,7 +234,7 @@ impl Parser {
             Some(token) => token,
             unexpected => {
                 return Err(FlushError(
-                    self.file.clone(),
+                    self.file_path.clone(),
                     self.previous().line,
                     format!("Expected expression found '{:?}'", unexpected),
                     None,
@@ -263,7 +263,7 @@ impl Parser {
             TokenKind::LBracket => self.parse_list()?,
             unexpected => {
                 return Err(FlushError(
-                    self.file.clone(),
+                    self.file_path.clone(),
                     next.line,
                     format!("Expected expression found '{:?}'", unexpected),
                     None,

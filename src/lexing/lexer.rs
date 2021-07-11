@@ -4,17 +4,17 @@ use crate::error::{FlushError, Result};
 #[derive(Default)]
 pub struct Lexer {
     program: String,
-    file: String,
+    file_path: String,
     tokens: Vec<Token>,
     position: usize,
     line: usize,
 }
 
 impl Lexer {
-    pub fn new(program: impl ToString, file: impl ToString) -> Self {
+    pub fn new(program: impl ToString, file_path: impl ToString) -> Self {
         Self {
             program: program.to_string(),
-            file: file.to_string(),
+            file_path: file_path.to_string(),
             line: 1,
             ..Default::default()
         }
@@ -60,11 +60,11 @@ impl Lexer {
                 Some(character) => {
                     if character == '\n' {
                         return Err(FlushError(
-                            self.file.clone(),
+                            self.file_path.clone(),
                             self.line,
                             "Illegal newline in string".to_string(),
-                            None
-                        ))
+                            None,
+                        ));
                     }
 
                     string.push(character);
@@ -77,7 +77,7 @@ impl Lexer {
 
         if self.current() != Some('"') {
             return Err(FlushError(
-                self.file.clone(),
+                self.file_path.clone(),
                 self.line,
                 "Unterminated string".to_string(),
                 None,

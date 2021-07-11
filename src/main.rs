@@ -31,13 +31,15 @@ fn main() {
         }
     };
 
-    let mut lexer = Lexer::new(file_content, file_path.to_str().unwrap_or(""));
+    let str_file_path = file_path.to_str().unwrap();
+
+    let mut lexer = Lexer::new(file_content, str_file_path);
     let tokens = match lexer.tokenize() {
         Ok(tokens) => tokens,
         Err(e) => return eprintln!("{}", e),
     };
 
-    let mut parser = Parser::new(tokens, file_path.to_str().unwrap_or(""));
+    let mut parser = Parser::new(tokens, str_file_path);
     let statements = match parser.parse() {
         Ok(statements) => statements,
         Err(e) => return eprintln!("{}", e),
