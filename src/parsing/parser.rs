@@ -41,7 +41,7 @@ impl Parser {
         if self.is_at_end() {
             return Err(FlushError(
                 self.file.clone(),
-                self.current().line,
+                self.previous().line,
                 format!("Expected {:?} found nothing", expected),
                 None,
             ));
@@ -71,7 +71,7 @@ impl Parser {
         Ok(match self.advance().unwrap().kind {
             TokenKind::If => self.parse_control_flow()?,
             TokenKind::Def => self.parse_def()?,
-            TokenKind::Return => self.parse_return()?,
+            TokenKind::Return => Statement::Return(self.parse_expr()?),
             unknow => {
                 self.position -= 1;
                 match self.parse_expr() {
@@ -161,7 +161,7 @@ impl Parser {
         };
 
         Ok(match token.kind {
-            TokenKind::Assign => self.parse_var_def(id)?,
+            TokenKind::Assign => Statement::VarDef(id, self.parse_expr()?),
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
@@ -172,11 +172,6 @@ impl Parser {
                 ))
             }
         })
-    }
-
-    fn parse_var_def(&mut self, id: String) -> Result<Statement> {
-        let value = self.parse_expr()?;
-        Ok(Statement::VarDef(id, value))
     }
 
     fn parse_func_def(&mut self, id: String) -> Result<Statement> {
@@ -220,20 +215,18 @@ impl Parser {
                 }
             };
 
+            self.position -= 1;
+
             if current.kind == TokenKind::RBrace {
                 break;
             }
 
-            self.position -= 1;
             body.push(self.parse_statement()?);
         }
 
-        Ok(Statement::FuncDef(id, args, body))
-    }
+        self.expect(TokenKind::RBrace)?;
 
-    fn parse_return(&mut self) -> Result<Statement> {
-        let value = self.parse_expr()?;
-        Ok(Statement::Return(value))
+        Ok(Statement::FuncDef(id, args, body))
     }
 
     fn parse_expr(&mut self) -> Result<Expr> {
