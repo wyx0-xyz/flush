@@ -37,16 +37,16 @@ impl Lexer {
         self.position >= self.program.len()
     }
 
-    fn push_token(&mut self, token: TokenKind) {
+    fn push_token(&mut self, kind: TokenKind) {
         self.tokens.push(Token {
             line: self.line,
-            kind: token,
+            kind,
         });
     }
 
     fn skip_comment(&mut self) {
         while !self.is_at_end() && self.advance() != Some('\n') {
-            self.advance();
+            self.position += 1;
         }
 
         self.line += 1;
@@ -57,19 +57,22 @@ impl Lexer {
 
         while !self.is_at_end() && self.current() != Some('"') {
             match self.current() {
-                Some('\n') => {
-                    return Err(FlushError(
-                        self.file.clone(),
-                        self.line,
-                        "Illegal newline in string".to_string(),
-                        Some("use \\n instead".to_string()),
-                    ))
+                Some(character) => {
+                    if character == '\n' {
+                        return Err(FlushError(
+                            self.file.clone(),
+                            self.line,
+                            "Illegal newline in string".to_string(),
+                            None
+                        ))
+                    }
+
+                    string.push(character);
                 }
-                Some(character) => string.push(character),
                 None => break,
             };
 
-            self.advance();
+            self.position += 1;
         }
 
         if self.current() != Some('"') {
@@ -81,7 +84,7 @@ impl Lexer {
             ));
         }
 
-        self.advance(); // skip "
+        self.position += 1;
         self.push_token(TokenKind::String(string));
 
         Ok(())
@@ -98,7 +101,7 @@ impl Lexer {
 
             if current == '.' || current.is_ascii_digit() {
                 raw_number.push(current);
-                self.advance();
+                self.position += 1;
             } else {
                 break;
             }
@@ -121,7 +124,7 @@ impl Lexer {
 
             if current == '_' || current.is_ascii_alphanumeric() {
                 identifier.push(current);
-                self.advance();
+                self.position += 1;
             } else {
                 break;
             }
@@ -141,71 +144,68 @@ impl Lexer {
     }
 
     fn parse_token(&mut self) -> Result<()> {
-        let character = match self.advance() {
-            Some(token) => token,
-            None => return Ok(()),
-        };
-
-        match character {
-            '(' => self.push_token(TokenKind::LParen),
-            ')' => self.push_token(TokenKind::RParen),
-            '{' => self.push_token(TokenKind::LBrace),
-            '}' => self.push_token(TokenKind::RBrace),
-            '[' => self.push_token(TokenKind::LBracket),
-            ']' => self.push_token(TokenKind::RBracket),
-            ':' => self.push_token(TokenKind::Colon),
-            ',' => self.push_token(TokenKind::Comma),
-            '+' => self.push_token(TokenKind::Op(Op::Add)),
-            '-' => self.push_token(TokenKind::Op(Op::Sub)),
-            '*' => self.push_token(TokenKind::Op(Op::Mul)),
-            '/' => {
-                if self.current() == Some('=') {
-                    self.push_token(TokenKind::Op(Op::Ne));
-                    self.position += 1;
-                } else {
-                    self.push_token(TokenKind::Op(Op::Div))
+        if let Some(character) = self.advance() {
+            match character {
+                '(' => self.push_token(TokenKind::LParen),
+                ')' => self.push_token(TokenKind::RParen),
+                '{' => self.push_token(TokenKind::LBrace),
+                '}' => self.push_token(TokenKind::RBrace),
+                '[' => self.push_token(TokenKind::LBracket),
+                ']' => self.push_token(TokenKind::RBracket),
+                ':' => self.push_token(TokenKind::Colon),
+                ',' => self.push_token(TokenKind::Comma),
+                '+' => self.push_token(TokenKind::Op(Op::Add)),
+                '-' => self.push_token(TokenKind::Op(Op::Sub)),
+                '*' => self.push_token(TokenKind::Op(Op::Mul)),
+                '/' => {
+                    if self.current() == Some('=') {
+                        self.push_token(TokenKind::Op(Op::Ne));
+                        self.position += 1;
+                    } else {
+                        self.push_token(TokenKind::Op(Op::Div))
+                    }
                 }
-            }
-            '%' => self.push_token(TokenKind::Op(Op::Mod)),
-            '^' => self.push_token(TokenKind::Op(Op::Square)),
-            '<' => {
-                if self.current() == Some('=') {
-                    self.push_token(TokenKind::Op(Op::Le));
-                    self.position += 1;
-                } else {
-                    self.push_token(TokenKind::Op(Op::Lt));
+                '%' => self.push_token(TokenKind::Op(Op::Mod)),
+                '^' => self.push_token(TokenKind::Op(Op::Square)),
+                '<' => {
+                    if self.current() == Some('=') {
+                        self.push_token(TokenKind::Op(Op::Le));
+                        self.position += 1;
+                    } else {
+                        self.push_token(TokenKind::Op(Op::Lt));
+                    }
                 }
-            }
-            '>' => {
-                if self.current() == Some('=') {
-                    self.push_token(TokenKind::Op(Op::Ge));
-                    self.position += 1;
-                } else {
-                    self.push_token(TokenKind::Op(Op::Gt));
+                '>' => {
+                    if self.current() == Some('=') {
+                        self.push_token(TokenKind::Op(Op::Ge));
+                        self.position += 1;
+                    } else {
+                        self.push_token(TokenKind::Op(Op::Gt));
+                    }
                 }
-            }
-            '=' => {
-                if self.current() == Some('=') {
-                    self.push_token(TokenKind::Op(Op::Eq));
-                    self.position += 1;
-                } else {
-                    self.push_token(TokenKind::Assign);
+                '=' => {
+                    if self.current() == Some('=') {
+                        self.push_token(TokenKind::Op(Op::Eq));
+                        self.position += 1;
+                    } else {
+                        self.push_token(TokenKind::Assign);
+                    }
                 }
-            }
-            '"' => self.parse_string()?,
-            '#' => self.skip_comment(),
-            '\n' => self.line += 1,
-            _ if character.is_ascii_digit() => self.parse_number(),
-            '_' | _ if character.is_ascii_alphanumeric() => self.parse_identifier(),
-            _ => (),
-        };
+                '"' => self.parse_string()?,
+                '#' => self.skip_comment(),
+                '\n' => self.line += 1,
+                _ if character.is_ascii_digit() => self.parse_number(),
+                '_' | _ if character.is_ascii_alphanumeric() => self.parse_identifier(),
+                _ => (),
+            };
+        }
 
         Ok(())
     }
 
     pub fn tokenize(&mut self) -> Result<Vec<Token>> {
         while !self.is_at_end() {
-            self.parse_token()?
+            self.parse_token()?;
         }
 
         Ok(self.tokens.clone())
