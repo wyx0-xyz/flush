@@ -101,4 +101,93 @@ impl Interpreter {
             _ => return Err("Mods work only with numbers".to_string()),
         })
     }
+
+    pub fn cos(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("Cosine function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).cos()),
+	    Literal::Float(float) => Literal::Float(float.cos()),
+	    _ => return Err("Cosine works only with numbers".to_string()),
+	})
+    }
+
+
+    pub fn sin(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("Sine function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).sin()),
+	    Literal::Float(float) => Literal::Float(float.sin()),
+	    _ => return Err("Sine works only with numbers".to_string()),
+	})
+    }
+
+
+    pub fn tan(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("Tangent function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).cos()),
+	    Literal::Float(float) => Literal::Float(float.cos()),
+	    _ => return Err("Tangent works only with numbers".to_string()),
+	})
+    }
+
+
+    pub fn acos(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("ArcCosine function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).acos()),
+	    Literal::Float(float) => Literal::Float(float.acos()),
+	    _ => return Err("ArcCosine works only with numbers".to_string()),
+	})
+    }
+
+
+    pub fn asin(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("ArcSine function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).asin()),
+	    Literal::Float(float) => Literal::Float(float.asin()),
+	    _ => return Err("ArcSine works only with numbers".to_string()),
+	})
+    }
+
+
+    pub fn atan(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+	if args.len() <= 0 {
+	    return Err("ArcTangent function needs one argument".to_string());
+	}
+
+	let literal = self.get_literal(*args[0].clone())?;
+
+	Ok(match literal {
+	    Literal::Int(int) => Literal::Float((int as f64).acos()),
+	    Literal::Float(float) => Literal::Float(float.acos()),
+	    _ => return Err("ArcTangent works only with numbers".to_string()),
+	})
+    }
 }

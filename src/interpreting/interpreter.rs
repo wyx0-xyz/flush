@@ -27,6 +27,12 @@ impl Interpreter {
             ("printLn", Self::print_ln),
             ("flushStdout", Self::flush_stdout),
             ("readLine", Self::read_line),
+            ("cos", Self::cos),
+            ("sin", Self::sin),
+            ("tan", Self::tan),
+            ("acos", Self::acos),
+            ("asin", Self::asin),
+            ("atan", Self::atan),
         ]);
 
         interpreter
