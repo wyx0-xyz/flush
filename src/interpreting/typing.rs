@@ -20,7 +20,7 @@ pub enum ScopeContext {
 impl fmt::Display for Literal {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Literal::String(string) => write!(f, "{}", string),
+            Literal::String(string) => write!(f, "\"{}\"", string),
             Literal::Int(int) => write!(f, "{}", int),
             Literal::Float(float) => write!(f, "{}", float),
             Literal::Boolean(boolean) => write!(f, "{}", boolean),

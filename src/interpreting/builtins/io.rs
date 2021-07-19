@@ -25,10 +25,7 @@ impl Interpreter {
 
     pub fn print(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         for arg in args {
-            match self.get_literal(*arg)? {
-                Literal::String(string) => print!("\"{}\"", string),
-                literal => print!("{}", literal),
-            };
+            print!("{}", self.get_literal(*arg)?);
         }
 
         Ok(Literal::None)
