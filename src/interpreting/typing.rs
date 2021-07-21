@@ -7,6 +7,7 @@ pub enum Literal {
     Int(i32),
     Float(f64),
     Boolean(bool),
+    List(Vec<Box<Literal>>),
     Function(String, Vec<String>, Vec<Statement>),
     None
 }
@@ -24,6 +25,19 @@ impl fmt::Display for Literal {
             Literal::Int(int) => write!(f, "{}", int),
             Literal::Float(float) => write!(f, "{}", float),
             Literal::Boolean(boolean) => write!(f, "{}", boolean),
+            Literal::List(list) => {
+                write!(f, "[")?;
+
+                for (i, expr) in list.into_iter().enumerate() {
+                    if i == list.len() - 1 {
+                        write!(f, "{}", expr)?;
+                    } else {
+                        write!(f, "{}, ", expr)?;
+                    }
+                }
+
+                write!(f, "]")
+            }
             Literal::Function(name, args, _) => write!(f, "<function:{}#{}>", name, args.join(", ")),
             Literal::None => write!(f, "None"),
         }

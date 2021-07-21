@@ -160,9 +160,19 @@ impl Interpreter {
             Expr::Boolean(boolean) => Literal::Boolean(boolean),
             Expr::Var(id) => self.get_var(id)?,
             Expr::Call(id, args) => self.eval_call(id, args)?,
+            Expr::List(list) => Literal::List(self.get_literals(list)?),
             Expr::BinOp(op, left, right) => self.eval_binary_op(op, left, right)?,
-            _ => return Err("Binary Operators are not implemented yet.".to_string()),
         })
+    }
+
+    fn get_literals(&mut self, list: Vec<Box<Expr>>) -> Result<Vec<Box<Literal>>, String> {
+        let mut literals: Vec<Box<Literal>> = vec![];
+
+        for expr in list {
+            literals.push(Box::new(self.get_literal(*expr)?));
+        }
+
+        Ok(literals)
     }
 
     pub fn eval_call(&mut self, id: String, call_args: Vec<Box<Expr>>) -> Result<Literal, String> {
