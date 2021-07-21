@@ -51,27 +51,7 @@ impl PartialEq for Literal {
     }
 
     fn ne(&self, right: &Self) -> bool {
-        match self {
-            Literal::String(left_str) => match right {
-                Literal::String(right_str) => left_str != right_str,
-                _ => false,
-            },
-            Literal::Int(left_int) => match right {
-                Literal::Int(right_int) => left_int != right_int,
-                Literal::Float(right_float) => (*left_int as f64) == *right_float,
-                _ => false,
-            },
-            Literal::Float(left_float) => match right {
-                Literal::Float(right_float) => left_float != right_float,
-                Literal::Int(right_int) => *left_float != (*right_int as f64),
-                _ => false,
-            },
-            Literal::Boolean(left_bool) => match right {
-                Literal::Boolean(right_bool) => left_bool != right_bool,
-                _ => false,
-            },
-            _ => false,
-        }
+        !(self == right)
     }
 }
 
