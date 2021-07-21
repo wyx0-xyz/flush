@@ -46,8 +46,8 @@ fn main() {
     };
 
     let mut interpreter = Interpreter::new(statements);
-    match interpreter.interpret() {
-        Ok(()) => (),
-        Err(e) => return eprintln!("{}", e),
-    };
+
+    if let Err(e) = interpreter.interpret() {
+        return eprintln!("{}", e);
+    }
 }
