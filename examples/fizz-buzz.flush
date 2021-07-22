@@ -17,4 +17,3 @@ def fizz(n) {
 def main() {
     fizz(6)
 }
-

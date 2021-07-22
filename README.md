@@ -28,7 +28,7 @@ Run a file with: `flush <path/to/file>`.
 
 You can find all examples [here](./examples/).
 
-### Hello, World!
+### [Hello, World!](./examples/hello_world.flush)
 
 ```scala
 def main() {
@@ -36,7 +36,7 @@ def main() {
 }
 ```
 
-### Factorial
+### [Factorial](./examples/factorial.flush)
 
 ```scala
 def fac(n) {
@@ -48,7 +48,7 @@ def fac(n) {
 }
 ```
 
-### FizzBuzz
+### [FizzBuzz](./examples/fizz-buzz.flush)
 
 ```scala
 def fizz(n) {
