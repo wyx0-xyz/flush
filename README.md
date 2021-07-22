@@ -47,3 +47,24 @@ def fac(n) {
     return n * fac(n - 1)
 }
 ```
+
+### FizzBuzz
+
+```scala
+def fizz(n) {
+    if (0 == n % 15) {
+        putStrLn("FizzBuzz")
+    } else {
+        if (0 == n % 5) {
+            putStrLn("Buzz")
+        }
+        
+        if (0 == n % 3) {
+            putStrLn("Fizz")
+        } else {
+            printLn(n)
+        }
+    }
+}
+```
+
