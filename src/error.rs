@@ -2,7 +2,7 @@ use ansi_term::Colour::{Blue, Red, Yellow};
 use std::fmt;
 
 #[derive(Debug)]
-pub struct FlushError(pub String, pub usize, pub String, pub Option<String>);
+pub struct FlushError(pub String, pub usize, pub String);
 
 pub type Result<T> = std::result::Result<T, FlushError>;
 
@@ -11,15 +11,10 @@ impl fmt::Display for FlushError {
         write!(
             f,
             "=> {}:{}\n{}: {}",
-            Blue.paint(self.0.clone()),
+            Blue.paint(&self.0),
             Yellow.paint(self.1.to_string()),
             Red.paint("error"),
             self.2
-        )?;
-
-        match self.3.clone() {
-            Some(note) => write!(f, "\n{}: {}", Yellow.paint("note"), note),
-            None => write!(f, ""),
-        }
+        )
     }
 }

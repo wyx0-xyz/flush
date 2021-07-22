@@ -2,21 +2,21 @@ use super::typing::*;
 use crate::error::{FlushError, Result};
 use crate::lexing::typing::*;
 
-#[derive(Default)]
-pub struct Parser {
-    tokens: Vec<Token>,
-    file_path: String,
+pub struct Parser<'a> {
+    tokens: &'a Vec<Token>,
+    file_path: &'a str,
     statements: Vec<Statement>,
     position: usize,
 }
 
 #[allow(unreachable_patterns)]
-impl Parser {
-    pub fn new(tokens: Vec<Token>, file_path: impl ToString) -> Self {
+impl<'a> Parser<'a> {
+    pub fn new(tokens: &'a Vec<Token>, file_path: &'a str) -> Self {
         Self {
             tokens,
-            file_path: file_path.to_string(),
-            ..Default::default()
+            file_path,
+            statements: vec![],
+            position: 0,
         }
     }
 
@@ -40,10 +40,9 @@ impl Parser {
     fn expect(&mut self, expected: TokenKind) -> Result<Token> {
         if self.is_at_end() {
             return Err(FlushError(
-                self.file_path.clone(),
+                self.file_path.to_string(),
                 self.previous().line,
                 format!("Expected {:?} found nothing", expected),
-                None,
             ));
         }
 
@@ -53,10 +52,9 @@ impl Parser {
 
         if next.kind != expected {
             return Err(FlushError(
-                self.file_path.clone(),
+                self.file_path.to_string(),
                 next.line,
-                format!("Unexpected token {:?}", next.kind),
-                Some(format!("Expected {:?}", expected)),
+                format!("Unexpected token {:?}, expected {:?}", next.kind, expected),
             ));
         }
 
@@ -78,10 +76,9 @@ impl Parser {
                     Ok(expr) => Statement::Expr(expr),
                     _ => {
                         return Err(FlushError(
-                            self.file_path.clone(),
+                            self.file_path.to_string(),
                             self.previous().line,
                             format!("Unknow statement {:?}", unknow),
-                            None,
                         ));
                     }
                 }
@@ -131,19 +128,17 @@ impl Parser {
                 TokenKind::Ident(id) => id,
                 kind => {
                     return Err(FlushError(
-                        self.file_path.clone(),
+                        self.file_path.to_string(),
                         token.line,
                         format!("Expected identifier found '{:?}'", kind),
-                        None,
                     ))
                 }
             },
             _ => {
                 return Err(FlushError(
-                    self.file_path.clone(),
+                    self.file_path.to_string(),
                     self.previous().line,
                     "Expected identifier".to_string(),
-                    None,
                 ))
             }
         };
@@ -152,10 +147,9 @@ impl Parser {
             Some(token) => token,
             None => {
                 return Err(FlushError(
-                    self.file_path.clone(),
+                    self.file_path.to_string(),
                     self.previous().line,
                     "Unexpected token def".to_string(),
-                    None,
                 ))
             }
         };
@@ -165,10 +159,9 @@ impl Parser {
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.clone(),
+                    self.file_path.to_string(),
                     token.line,
                     format!("Unexpected token: {:?}", unexpected),
-                    None,
                 ))
             }
         })
@@ -182,10 +175,9 @@ impl Parser {
                 TokenKind::Ident(id) => args.push(id),
                 unexpected => {
                     return Err(FlushError(
-                        self.file_path.clone(),
+                        self.file_path.to_string(),
                         self.previous().line,
                         format!("Unexpected token '{:?}'", unexpected),
-                        None,
                     ))
                 }
             };
@@ -207,10 +199,9 @@ impl Parser {
                 Some(token) => token,
                 None => {
                     return Err(FlushError(
-                        self.file_path.clone(),
+                        self.file_path.to_string(),
                         self.previous().line,
                         "Unfinished function body".to_string(),
-                        Some("Add }".to_string()),
                     ))
                 }
             };
@@ -234,10 +225,9 @@ impl Parser {
             Some(token) => token,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.clone(),
+                    self.file_path.to_string(),
                     self.previous().line,
                     format!("Expected expression found '{:?}'", unexpected),
-                    None,
                 ))
             }
         };
@@ -263,10 +253,9 @@ impl Parser {
             TokenKind::LBracket => self.parse_list()?,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.clone(),
+                    self.file_path.to_string(),
                     next.line,
                     format!("Expected expression found '{:?}'", unexpected),
-                    None,
                 ))
             }
         };
@@ -344,13 +333,13 @@ impl Parser {
         Ok(Expr::Call(id, args))
     }
 
-    pub fn parse(&mut self) -> Result<Vec<Statement>> {
+    pub fn parse(&mut self) -> Result<&Vec<Statement>> {
         while !self.is_at_end() {
             let statement = self.parse_statement()?;
             self.statements.push(statement.clone());
         }
 
-        Ok(self.statements.clone())
+        Ok(&self.statements)
     }
 }
 

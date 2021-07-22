@@ -2,21 +2,22 @@ use super::typing::*;
 use crate::error::{FlushError, Result};
 
 #[derive(Default)]
-pub struct Lexer {
-    program: String,
-    file_path: String,
+pub struct Lexer<'a> {
+    program: &'a str,
+    file_path: &'a str,
     tokens: Vec<Token>,
     position: usize,
     line: usize,
 }
 
-impl Lexer {
-    pub fn new(program: impl ToString, file_path: impl ToString) -> Self {
+impl<'a> Lexer<'a> {
+    pub fn new(program: &'a str, file_path: &'a str) -> Self {
         Self {
-            program: program.to_string(),
-            file_path: file_path.to_string(),
+            program,
+            file_path,
+            tokens: vec![],
+            position: 0,
             line: 1,
-            ..Default::default()
         }
     }
 
@@ -60,10 +61,9 @@ impl Lexer {
                 Some(character) => {
                     if character == '\n' {
                         return Err(FlushError(
-                            self.file_path.clone(),
+                            self.file_path.to_string(),
                             self.line,
                             "Illegal newline in string".to_string(),
-                            None,
                         ));
                     }
 
@@ -77,10 +77,9 @@ impl Lexer {
 
         if self.current() != Some('"') {
             return Err(FlushError(
-                self.file_path.clone(),
+                self.file_path.to_string(),
                 self.line,
                 "Unterminated string".to_string(),
-                None,
             ));
         }
 
@@ -203,12 +202,12 @@ impl Lexer {
         Ok(())
     }
 
-    pub fn tokenize(&mut self) -> Result<Vec<Token>> {
+    pub fn tokenize(&mut self) -> Result<&Vec<Token>> {
         while !self.is_at_end() {
             self.parse_token()?;
         }
 
-        Ok(self.tokens.clone())
+        Ok(&self.tokens)
     }
 }
 
@@ -218,8 +217,8 @@ mod test {
     use crate::error::Result;
     use crate::lexing::typing::*;
 
-    fn get_types(tokens: Vec<Token>) -> Vec<TokenKind> {
-        tokens.into_iter().map(|t| t.kind.clone()).collect()
+    fn get_types(tokens: &Vec<Token>) -> Vec<TokenKind> {
+        tokens.into_iter().map(|t| t.kind).collect()
     }
 
     #[test]

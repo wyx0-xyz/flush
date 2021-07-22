@@ -33,7 +33,7 @@ fn main() {
 
     let str_file_path = file_path.to_str().unwrap();
 
-    let mut lexer = Lexer::new(file_content, str_file_path);
+    let mut lexer = Lexer::new(&file_content, str_file_path);
     let tokens = match lexer.tokenize() {
         Ok(tokens) => tokens,
         Err(e) => return eprintln!("{}", e),
@@ -45,7 +45,7 @@ fn main() {
         Err(e) => return eprintln!("{}", e),
     };
 
-    let mut interpreter = Interpreter::new(statements);
+    let mut interpreter = Interpreter::new(statements.clone());
 
     if let Err(e) = interpreter.interpret() {
         return eprintln!("{}", e);
