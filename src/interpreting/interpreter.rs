@@ -33,6 +33,7 @@ impl Interpreter {
             ("acos", Self::acos),
             ("asin", Self::asin),
             ("atan", Self::atan),
+            ("range", Self::range),
         ]);
 
         interpreter

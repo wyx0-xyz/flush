@@ -11,7 +11,9 @@ impl Interpreter {
             (Literal::Int(left), Literal::Int(right)) => Literal::Int(left + right),
             (Literal::Float(left), Literal::Float(right)) => Literal::Float(left + right),
             (Literal::Int(left), Literal::Float(right)) => Literal::Float((left as f64) + right),
-            (Literal::String(left), Literal::String(right)) => Literal::String(format!("{}{}", left, right)),
+            (Literal::String(left), Literal::String(right)) => {
+                Literal::String(format!("{}{}", left, right))
+            }
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left + (right as f64)),
             (left, right) => return Err(format!("Can't add {} and {}", left, right)),
         })
@@ -39,8 +41,12 @@ impl Interpreter {
             (Literal::Float(left), Literal::Float(right)) => Literal::Float(left * right),
             (Literal::Int(left), Literal::Float(right)) => Literal::Float((left as f64) * right),
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left * (right as f64)),
-            (Literal::Int(left), Literal::String(right)) => Literal::String(right.repeat(left as usize)),
-            (Literal::String(left), Literal::Int(right)) => Literal::String(left.repeat(right as usize)),
+            (Literal::Int(left), Literal::String(right)) => {
+                Literal::String(right.repeat(left as usize))
+            }
+            (Literal::String(left), Literal::Int(right)) => {
+                Literal::String(left.repeat(right as usize))
+            }
             (left, right) => return Err(format!("Can't multiply {} and {}", left, right)),
         })
     }
@@ -48,7 +54,7 @@ impl Interpreter {
     pub fn div(&mut self, left: Box<Expr>, right: Box<Expr>) -> Result<Literal, String> {
         let left_literal = self.get_literal(*left)?;
         let right_literal = self.get_literal(*right)?;
-        
+
         Ok(match (left_literal, right_literal) {
             (Literal::Int(left), Literal::Int(right)) => Literal::Int(left / right),
             (Literal::Float(left), Literal::Float(right)) => Literal::Float(left / right),
