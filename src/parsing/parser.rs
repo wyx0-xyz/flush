@@ -372,7 +372,7 @@ mod test {
 
     #[test]
     fn control_flow() -> Result<()> {
-        let mut lexer = Lexer::new("if (true) {} else {}", "__test__.flush");
+        let mut lexer = Lexer::new(r#"if (true) {} else {}"#, "__test__.flush");
         let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         assert_eq!(
@@ -429,6 +429,19 @@ mod test {
             Ok(_) => panic!(),
             Err(e) => assert_eq!(e.2, "Expected RBrace found nothing".to_string()),
         };
+
+        Ok(())
+    }
+
+    #[test]
+    fn while_loop() -> Result<()> {
+        let mut lexer = Lexer::new(r#"while (false) {}"#, "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+
+        assert_eq!(
+            parser.parse()?,
+            &vec![Statement::While(Expr::Boolean(false), vec![])]
+        );
 
         Ok(())
     }
