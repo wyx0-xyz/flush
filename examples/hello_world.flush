@@ -1,9 +1,3 @@
-def add() {
-    while (true) {
-        return 1
-    }
-}
-
 def main() {
-    printLn(add())
+    putStrLn("Hello, World!")
 }
