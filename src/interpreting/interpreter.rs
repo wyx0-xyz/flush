@@ -184,6 +184,8 @@ impl Interpreter {
         } {
             if let Statement::Return(expr) = *statement {
                 return Ok(Some(self.get_literal(expr)?));
+            } else {
+                self.eval_statement(*statement)?;
             }
         }
 
