@@ -352,14 +352,12 @@ mod test {
 
     #[test]
     fn control_flow() -> Result<()> {
-        let mut parser = Parser::new(
-            Lexer::new("if (true) {} else {} ", "__test__").tokenize()?,
-            "__test__",
-        );
+        let mut lexer = Lexer::new("if (true) {} else {}", "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         assert_eq!(
             parser.parse()?,
-            vec![Statement::If(Expr::Boolean(true), vec![], vec![])]
+            &vec![Statement::If(Expr::Boolean(true), vec![], vec![])]
         );
 
         Ok(())
@@ -367,14 +365,12 @@ mod test {
 
     #[test]
     fn var_def() -> Result<()> {
-        let mut parser = Parser::new(
-            Lexer::new(r#"def username = "wyxo""#, "__test__").tokenize()?,
-            "__test__",
-        );
+        let mut lexer = Lexer::new(r#"def username = "wyxo""#, "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         assert_eq!(
             parser.parse()?,
-            vec![Statement::VarDef(
+            &vec![Statement::VarDef(
                 "username".to_string(),
                 Expr::String("wyxo".to_string())
             )]
@@ -385,14 +381,12 @@ mod test {
 
     #[test]
     fn func_def() -> Result<()> {
-        let mut parser = Parser::new(
-            Lexer::new(r#"def add(a, b) { return a + b }"#, "__test__").tokenize()?,
-            "__test__",
-        );
+        let mut lexer = Lexer::new(r#"def add(a, b) { return a + b }"#, "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         assert_eq!(
             parser.parse()?,
-            vec![Statement::FuncDef(
+            &vec![Statement::FuncDef(
                 "add".to_string(),
                 vec!["a".to_string(), "b".to_string()],
                 vec![Statement::Return(Expr::BinOp(
@@ -408,10 +402,8 @@ mod test {
 
     #[test]
     fn unterminated_func_def() -> Result<()> {
-        let mut parser = Parser::new(
-            Lexer::new("def f(x) { return x * x", "__test__").tokenize()?,
-            "__test__",
-        );
+        let mut lexer = Lexer::new("def f(x) { return x * x", "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         match parser.parse() {
             Ok(_) => panic!(),
@@ -423,18 +415,15 @@ mod test {
 
     #[test]
     fn expressions() -> Result<()> {
-        let mut parser = Parser::new(
-            Lexer::new(
-                r#""Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
-                "__test__",
-            )
-            .tokenize()?,
-            "__test__",
+        let mut lexer = Lexer::new(
+            r#""Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
+            "__test__.flush",
         );
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
 
         assert_eq!(
             parser.parse()?,
-            vec![
+            &vec![
                 Statement::Expr(Expr::String("Hello, Flush!".to_string()),),
                 Statement::Expr(Expr::Int(54)),
                 Statement::Expr(Expr::Float(3.14)),
