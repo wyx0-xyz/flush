@@ -134,6 +134,7 @@ impl<'a> Lexer<'a> {
             "else" => TokenKind::Else,
             "def" => TokenKind::Def,
             "return" => TokenKind::Return,
+            "while" => TokenKind::While,
             "true" => TokenKind::Boolean(true),
             "false" => TokenKind::Boolean(false),
             ident => TokenKind::Ident(ident.to_string()),
@@ -282,7 +283,7 @@ mod test {
 
     #[test]
     fn keywords() -> Result<()> {
-        let mut lexer = Lexer::new("if else def false user true return user_id", "__test__.flush");
+        let mut lexer = Lexer::new("if else def false user true return while user_id", "__test__.flush");
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
@@ -293,6 +294,7 @@ mod test {
                 TokenKind::Ident("user".to_string()),
                 TokenKind::Boolean(true),
                 TokenKind::Return,
+                TokenKind::While,
                 TokenKind::Ident("user_id".to_string())
             ]
         );

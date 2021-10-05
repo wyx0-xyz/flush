@@ -81,6 +81,7 @@ impl Interpreter {
             Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
             Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
             Statement::Return(expr) => Some(self.get_literal(expr)?),
+            Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -124,32 +125,52 @@ impl Interpreter {
         Ok(None)
     }
 
+    fn eval_while(
+        &mut self,
+        condition: Expr,
+        statements: Vec<Box<Statement>>,
+    ) -> Result<Option<Literal>, String> {
+        while self.eval_condition(condition.clone())? {
+            for statement in statements.clone() {
+                if let Statement::Return(expr) = *statement {
+                    return Ok(Some(self.get_literal(expr)?));
+                }
+
+                self.eval_statement(*statement)?;
+            }
+        }
+
+        Ok(None)
+    }
+
     fn eval_control_flow(
         &mut self,
         condition: Expr,
         if_body: Vec<Box<Statement>>,
         else_body: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
-        match self.get_literal(condition) {
-            Ok(Literal::Boolean(boolean)) => {
-                for statement in if boolean { if_body } else { else_body } {
-                    if let Statement::Return(expr) = *statement.clone() {
-                        return Ok(Some(self.get_literal(expr)?));
-                    }
-
-                    self.eval_statement(*statement)?;
-                }
+        for statement in if self.eval_condition(condition)? {
+            if_body
+        } else {
+            else_body
+        } {
+            if let Statement::Return(expr) = *statement {
+                return Ok(Some(self.get_literal(expr)?));
             }
-            Ok(unexpected) => {
-                return Err(format!(
-                    "Expression must return boolean, actually return '{}'",
-                    unexpected
-                ))
-            }
-            Err(e) => return Err(e),
         }
 
         Ok(None)
+    }
+
+    fn eval_condition(&mut self, condition: Expr) -> Result<bool, String> {
+        match self.get_literal(condition) {
+            Ok(Literal::Boolean(boolean)) => Ok(boolean),
+            Ok(unexpected) => Err(format!(
+                "Expression must return boolean, actually return '{}'",
+                unexpected
+            )),
+            Err(error) => Err(error),
+        }
     }
 
     pub fn get_literal(&mut self, expr: Expr) -> Result<Literal, String> {

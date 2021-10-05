@@ -70,6 +70,7 @@ impl<'a> Parser<'a> {
             TokenKind::If => self.parse_control_flow()?,
             TokenKind::Def => self.parse_def()?,
             TokenKind::Return => Statement::Return(self.parse_expr()?),
+            TokenKind::While => self.parse_while()?,
             unknow => {
                 self.position -= 1;
                 match self.parse_expr() {
@@ -218,6 +219,25 @@ impl<'a> Parser<'a> {
         self.expect(TokenKind::RBrace)?;
 
         Ok(Statement::FuncDef(id, args, body))
+    }
+
+    fn parse_while(&mut self) -> Result<Statement> {
+        self.expect(TokenKind::LParen)?;
+
+        let condition = self.parse_expr()?;
+
+        self.expect(TokenKind::RParen)?;
+        self.expect(TokenKind::LBrace)?;
+
+        let mut body: Vec<Box<Statement>> = vec![];
+
+        while !self.is_at_end() && self.current().kind != TokenKind::RBrace {
+            body.push(Box::new(self.parse_statement()?));
+        }
+
+        self.expect(TokenKind::RBrace)?;
+
+        Ok(Statement::While(condition, body))
     }
 
     fn parse_expr(&mut self) -> Result<Expr> {

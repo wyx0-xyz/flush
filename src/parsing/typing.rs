@@ -4,6 +4,7 @@ pub enum Statement {
     VarDef(String, Expr),                               // def user_id = ...
     FuncDef(String, Vec<String>, Vec<Statement>),       // def factorial(...) { ... }
     Return(Expr),                                       // return ...
+    While(Expr, Vec<Box<Statement>>),                   // while (true) { ... }
     Expr(Expr),
 }
 
