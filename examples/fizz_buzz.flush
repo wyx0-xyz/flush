@@ -15,5 +15,7 @@ def fizz(n) {
 }
 
 def main() {
-    fizz(6)
+    for (i in range(1, 10)) {
+        fizz(i)
+    }
 }

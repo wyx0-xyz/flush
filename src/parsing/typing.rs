@@ -5,6 +5,7 @@ pub enum Statement {
     FuncDef(String, Vec<String>, Vec<Statement>),       // def factorial(...) { ... }
     Return(Expr),                                       // return ...
     While(Expr, Vec<Box<Statement>>),                   // while (true) { ... }
+    For(String, Expr, Vec<Box<Statement>>),             // for (i in ...) { ... }
     Expr(Expr),
 }
 

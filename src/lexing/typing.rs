@@ -13,6 +13,8 @@ pub enum TokenKind {
     Def,            // def
     Return,         // return
     While,          // while
+    For,            // for
+    In,             // in
     String(String), // "Hello, World!"
     Int(i32),       // 42
     Float(f64),     // 3.14

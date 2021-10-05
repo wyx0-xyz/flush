@@ -83,6 +83,7 @@ impl Interpreter {
             Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
             Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
+            Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -138,6 +139,32 @@ impl Interpreter {
                 }
 
                 self.eval_statement(*statement)?;
+            }
+        }
+
+        Ok(None)
+    }
+
+    fn eval_for(
+        &mut self,
+        id: String,
+        expr: Expr,
+        statements: Vec<Box<Statement>>,
+    ) -> Result<Option<Literal>, String> {
+        match self.get_var(id.clone()) {
+            Ok(_) => return Err(format!("Variable {} already exists!", id)),
+            _ => (),
+        }
+
+        if let Literal::List(list) = self.get_literal(expr)? {
+            for element in list {
+                for statement in statements.clone() {
+                    self.push(id.clone(), *element.clone());
+
+                    self.eval_statement(*statement)?;
+
+                    self.stack.last_mut().unwrap().remove(id.as_str());
+                }
             }
         }
 

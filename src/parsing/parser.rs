@@ -71,6 +71,7 @@ impl<'a> Parser<'a> {
             TokenKind::Def => self.parse_def()?,
             TokenKind::Return => Statement::Return(self.parse_expr()?),
             TokenKind::While => self.parse_while()?,
+            TokenKind::For => self.parse_for()?,
             unknow => {
                 self.position -= 1;
                 match self.parse_expr() {
@@ -238,6 +239,38 @@ impl<'a> Parser<'a> {
         self.expect(TokenKind::RBrace)?;
 
         Ok(Statement::While(condition, body))
+    }
+
+    fn parse_for(&mut self) -> Result<Statement> {
+        self.expect(TokenKind::LParen)?;
+
+        let id = match self.parse_expr()? {
+            Expr::Var(id) => id,
+            unexpected => {
+                return Err(FlushError(
+                    self.file_path.to_string(),
+                    self.previous().line,
+                    format!("Expected Identifier found '{:?}'", unexpected),
+                ))
+            }
+        };
+
+        self.expect(TokenKind::In)?;
+
+        let iterator = self.parse_expr()?;
+
+        self.expect(TokenKind::RParen)?;
+        self.expect(TokenKind::LBrace)?;
+
+        let mut body: Vec<Box<Statement>> = vec![];
+
+        while !self.is_at_end() && self.current().kind != TokenKind::RBrace {
+            body.push(Box::new(self.parse_statement()?));
+        }
+
+        self.expect(TokenKind::RBrace)?;
+
+        Ok(Statement::For(id, iterator, body))
     }
 
     fn parse_expr(&mut self) -> Result<Expr> {
@@ -441,6 +474,19 @@ mod test {
         assert_eq!(
             parser.parse()?,
             &vec![Statement::While(Expr::Boolean(false), vec![])]
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn for_loop() -> Result<()> {
+        let mut lexer = Lexer::new(r#"for (i in []) {}"#, "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+
+        assert_eq!(
+            parser.parse()?,
+            &vec![Statement::For("i".to_string(), Expr::List(vec![]), vec![])]
         );
 
         Ok(())
