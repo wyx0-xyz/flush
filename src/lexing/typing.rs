@@ -15,6 +15,7 @@ pub enum TokenKind {
     While,          // while
     For,            // for
     In,             // in
+    Break,          // break
     String(String), // "Hello, World!"
     Int(i32),       // 42
     Float(f64),     // 3.14

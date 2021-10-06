@@ -84,6 +84,7 @@ impl Interpreter {
             Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
+            Statement::Break => return Err("Can only use break in loops!".to_string()),
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -136,6 +137,8 @@ impl Interpreter {
             for statement in statements.clone() {
                 if let Statement::Return(expr) = *statement {
                     return Ok(Some(self.get_literal(expr)?));
+                } else if Statement::Break == *statement {
+                    break;
                 }
 
                 self.eval_statement(*statement)?;
@@ -159,6 +162,10 @@ impl Interpreter {
         if let Literal::List(list) = self.get_literal(expr)? {
             for element in list {
                 for statement in statements.clone() {
+                    if Statement::Break == *statement {
+                        return Ok(None);
+                    }
+
                     self.push(id.clone(), *element.clone());
 
                     self.eval_statement(*statement)?;
