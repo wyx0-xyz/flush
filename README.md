@@ -48,7 +48,7 @@ def fac(n) {
 }
 ```
 
-### [FizzBuzz](./examples/fizz-buzz.flush)
+### [FizzBuzz](./examples/fizz_buzz.flush)
 
 ```scala
 def fizz(n) {
