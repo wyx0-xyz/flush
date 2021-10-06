@@ -68,3 +68,6 @@ def fizz(n) {
 }
 ```
 
+## License
+
+Distributed under the **MIT License**. See [license](./LICENSE) for more information.
