@@ -168,7 +168,14 @@ impl Interpreter {
 
                     self.push(id.clone(), *element.clone());
 
-                    self.eval_statement(*statement)?;
+                    match self.eval_statement(*statement) {
+                        Ok(_) => {}
+                        Err(e) => {
+                            if e != "Can only use break in loops!".to_string() {
+                                return Err(e);
+                            }
+                        }
+                    }
 
                     self.stack.last_mut().unwrap().remove(id.as_str());
                 }
