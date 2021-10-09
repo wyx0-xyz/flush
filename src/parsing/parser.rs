@@ -1,6 +1,5 @@
 use super::typing::*;
 use crate::error::{FlushError, Result};
-use crate::flush::process_file_path;
 use crate::lexing::typing::*;
 use std::path::PathBuf;
 
@@ -289,12 +288,7 @@ impl<'a> Parser<'a> {
             }
         };
 
-        let file_path = match process_file_path(&raw_file_path) {
-            Ok(path) => path,
-            Err(e) => return Err(FlushError(self.file_path.clone(), self.previous().line, e)),
-        };
-
-        Ok(Statement::Load(file_path))
+        Ok(Statement::Load(raw_file_path))
     }
 
     fn parse_expr(&mut self) -> Result<Expr> {

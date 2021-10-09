@@ -4,9 +4,8 @@ mod interpreting;
 mod lexing;
 mod parsing;
 
-use crate::interpreting::typing::Literal;
 use clap::{App, Arg};
-use std::{collections::HashMap, path::PathBuf};
+use std::path::PathBuf;
 
 fn main() {
     let matches = App::new("flush-lang")
@@ -21,7 +20,7 @@ fn main() {
         .get_matches();
 
     let raw_file_path = matches.value_of("file").unwrap();
-    let mut cache: HashMap<PathBuf, HashMap<String, Literal>> = HashMap::new();
+    let mut cache: Vec<PathBuf> = vec![];
 
     match flush::run(raw_file_path, &mut cache) {
         Ok(_) => {}

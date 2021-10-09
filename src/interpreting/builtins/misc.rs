@@ -3,7 +3,7 @@ use crate::{
     parsing::typing::Expr,
 };
 
-impl Interpreter {
+impl<'a> Interpreter<'a> {
     pub fn range(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 2 {
             return Err(format!("Expected 2 arguments, but given {}.", args.len()));

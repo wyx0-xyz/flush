@@ -57,7 +57,7 @@ impl PartialEq for Literal {
     }
 }
 
-impl Interpreter {
+impl<'a> Interpreter<'a> {
     pub fn lt(&mut self, left: Box<Expr>, right: Box<Expr>) -> Result<Literal, String> {
         let left_literal = self.get_literal(*left)?;
         let right_literal = self.get_literal(*right)?;

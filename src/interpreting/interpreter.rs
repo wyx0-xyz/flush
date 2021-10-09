@@ -1,20 +1,29 @@
+use crate::flush::run;
 use crate::interpreting::typing::*;
 use crate::parsing::typing::*;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-pub struct Interpreter {
+pub struct Interpreter<'a> {
     statements: Vec<Statement>,
+    file_path: PathBuf,
+    cache: &'a mut Vec<PathBuf>,
     stack: Vec<HashMap<String, Literal>>,
     builtins: HashMap<String, fn(&mut Self, Vec<Box<Expr>>) -> Result<Literal, String>>,
     context: ScopeContext,
     position: usize,
 }
 
-impl Interpreter {
-    pub fn new(statements: Vec<Statement>) -> Self {
+impl<'a> Interpreter<'a> {
+    pub fn new(
+        statements: Vec<Statement>,
+        file_path: PathBuf,
+        cache: &'a mut Vec<PathBuf>,
+    ) -> Self {
         let mut interpreter = Self {
             statements,
+            file_path,
+            cache,
             stack: vec![HashMap::new()], // TopLevel scope
             builtins: HashMap::new(),
             context: ScopeContext::TopLevel,
@@ -191,7 +200,21 @@ impl Interpreter {
         Ok(None)
     }
 
-    fn eval_load(&mut self, file_path: PathBuf) -> Result<Option<Literal>, String> {
+    fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
+        if raw_file_path == self.file_path.to_string_lossy().to_string() {
+            return Ok(None);
+        }
+
+        match run(&raw_file_path, self.cache) {
+            Ok(Some(stack)) => {
+                for (id, value) in stack {
+                    self.push(id, value);
+                }
+            }
+            Ok(None) => {}
+            Err(e) => return Err(e),
+        }
+
         Ok(None)
     }
 

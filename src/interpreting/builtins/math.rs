@@ -2,7 +2,7 @@ use crate::interpreting::interpreter::Interpreter;
 use crate::interpreting::typing::Literal;
 use crate::parsing::typing::Expr;
 
-impl Interpreter {
+impl<'a> Interpreter<'a> {
     pub fn add(&mut self, left: Box<Expr>, right: Box<Expr>) -> Result<Literal, String> {
         let left_literal = self.get_literal(*left)?;
         let right_literal = self.get_literal(*right)?;

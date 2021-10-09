@@ -3,7 +3,7 @@ use crate::interpreting::typing::Literal;
 use crate::parsing::typing::Expr;
 use std::io::Write;
 
-impl Interpreter {
+impl<'a> Interpreter<'a> {
     pub fn put_str(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         for arg in args {
             match self.get_literal(*arg)? {
