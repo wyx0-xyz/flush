@@ -1,17 +1,18 @@
 use super::typing::*;
 use crate::error::{FlushError, Result};
+use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct Lexer<'a> {
     program: &'a str,
-    file_path: &'a str,
+    file_path: PathBuf,
     tokens: Vec<Token>,
     position: usize,
     line: usize,
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(program: &'a str, file_path: &'a str) -> Self {
+    pub fn new(program: &'a str, file_path: PathBuf) -> Self {
         Self {
             program,
             file_path,
@@ -61,7 +62,7 @@ impl<'a> Lexer<'a> {
                 Some(character) => {
                     if character == '\n' {
                         return Err(FlushError(
-                            self.file_path.to_string(),
+                            self.file_path.clone(),
                             self.line,
                             "Illegal newline in string".to_string(),
                         ));
@@ -77,7 +78,7 @@ impl<'a> Lexer<'a> {
 
         if self.current() != Some('"') {
             return Err(FlushError(
-                self.file_path.to_string(),
+                self.file_path.clone(),
                 self.line,
                 "Unterminated string".to_string(),
             ));
@@ -138,6 +139,7 @@ impl<'a> Lexer<'a> {
             "for" => TokenKind::For,
             "in" => TokenKind::In,
             "break" => TokenKind::Break,
+            "load" => TokenKind::Load,
             "true" => TokenKind::Boolean(true),
             "false" => TokenKind::Boolean(false),
             ident => TokenKind::Ident(ident.to_string()),
@@ -217,9 +219,15 @@ impl<'a> Lexer<'a> {
 
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
+
     use super::Lexer;
     use crate::error::Result;
     use crate::lexing::typing::*;
+
+    fn tester_file_path() -> PathBuf {
+        PathBuf::from("__test__.flush")
+    }
 
     fn get_types(tokens: &Vec<Token>) -> Vec<TokenKind> {
         tokens.into_iter().map(|t| t.kind.clone()).collect()
@@ -227,7 +235,7 @@ mod test {
 
     #[test]
     fn single_line_comment() -> Result<()> {
-        let mut lexer = Lexer::new("# hello, world\n#lorem", "__test__.flush");
+        let mut lexer = Lexer::new("# hello, world\n#lorem", tester_file_path());
         assert_eq!(get_types(lexer.tokenize()?), vec![]);
 
         Ok(())
@@ -235,7 +243,7 @@ mod test {
 
     #[test]
     fn punctuation() -> Result<()> {
-        let mut lexer = Lexer::new("() {} [] , :", "__test__.flush");
+        let mut lexer = Lexer::new("() {} [] , :", tester_file_path());
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![
@@ -255,7 +263,7 @@ mod test {
 
     #[test]
     fn string() -> Result<()> {
-        let mut lexer = Lexer::new(r#""Hello, World!""#, "__test__.flush");
+        let mut lexer = Lexer::new(r#""Hello, World!""#, tester_file_path());
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![TokenKind::String("Hello, World!".to_string())]
@@ -266,7 +274,7 @@ mod test {
 
     #[test]
     fn unterminated_string() {
-        let mut lexer = Lexer::new(r#""Hello flush"#, "__test__.flush");
+        let mut lexer = Lexer::new(r#""Hello flush"#, tester_file_path());
         match lexer.tokenize() {
             Ok(_) => panic!(),
             Err(e) => assert_eq!(e.2, "Unterminated string"),
@@ -275,7 +283,7 @@ mod test {
 
     #[test]
     fn numbers() -> Result<()> {
-        let mut lexer = Lexer::new("32 18.25", "__test__.flush");
+        let mut lexer = Lexer::new("32 18.25", tester_file_path());
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![TokenKind::Int(32), TokenKind::Float(18.25)]
@@ -287,8 +295,8 @@ mod test {
     #[test]
     fn keywords() -> Result<()> {
         let mut lexer = Lexer::new(
-            "if else def false user true return while for in break user_id",
-            "__test__.flush",
+            "if else def false user true return while for in break load user_id",
+            tester_file_path(),
         );
         assert_eq!(
             get_types(lexer.tokenize()?),
@@ -313,7 +321,7 @@ mod test {
 
     #[test]
     fn operators() -> Result<()> {
-        let mut lexer = Lexer::new("+ - * / % ^ < > == /= <= >= =", "__test__.flush");
+        let mut lexer = Lexer::new("+ - * / % ^ < > == /= <= >= =", tester_file_path());
         assert_eq!(
             get_types(lexer.tokenize()?),
             vec![

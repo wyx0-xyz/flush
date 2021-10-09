@@ -7,6 +7,7 @@ pub enum Statement {
     While(Expr, Vec<Box<Statement>>),                   // while (true) { ... }
     For(String, Expr, Vec<Box<Statement>>),             // for (i in ...) { ... }
     Break,                                              // break
+    Load(String),                                       // load "..."
     Expr(Expr),
 }
 

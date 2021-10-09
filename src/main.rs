@@ -1,13 +1,11 @@
 mod error;
+mod flush;
 mod interpreting;
 mod lexing;
 mod parsing;
 
 use clap::{App, Arg};
-use interpreting::interpreter::Interpreter;
-use lexing::lexer::Lexer;
-use parsing::parser::Parser;
-use std::{fs, path};
+use std::path::PathBuf;
 
 fn main() {
     let matches = App::new("flush-lang")
@@ -22,32 +20,10 @@ fn main() {
         .get_matches();
 
     let raw_file_path = matches.value_of("file").unwrap();
-    let file_path = path::Path::new(raw_file_path);
+    let mut cache: Vec<PathBuf> = vec![];
 
-    let file_content = match fs::read_to_string(file_path) {
-        Ok(content) => content,
-        Err(error) => {
-            return eprintln!("Couldn't open {}: {}", file_path.display(), error);
-        }
-    };
-
-    let str_file_path = file_path.to_str().unwrap();
-
-    let mut lexer = Lexer::new(&file_content, str_file_path);
-    let tokens = match lexer.tokenize() {
-        Ok(tokens) => tokens,
-        Err(e) => return eprintln!("{}", e),
-    };
-
-    let mut parser = Parser::new(tokens, str_file_path);
-    let statements = match parser.parse() {
-        Ok(statements) => statements,
-        Err(e) => return eprintln!("{}", e),
-    };
-
-    let mut interpreter = Interpreter::new(statements.clone());
-
-    if let Err(e) = interpreter.interpret() {
-        return eprintln!("{}", e);
+    match flush::run(raw_file_path, &mut cache) {
+        Ok(_) => {}
+        Err(e) => eprintln!("{}", e),
     }
 }

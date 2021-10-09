@@ -1,19 +1,32 @@
+use crate::flush::run;
 use crate::interpreting::typing::*;
 use crate::parsing::typing::*;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
-pub struct Interpreter {
+pub struct Interpreter<'a> {
     statements: Vec<Statement>,
+    file_path: PathBuf,
+    cache: &'a mut Vec<PathBuf>,
+    eval_main: bool,
     stack: Vec<HashMap<String, Literal>>,
     builtins: HashMap<String, fn(&mut Self, Vec<Box<Expr>>) -> Result<Literal, String>>,
     context: ScopeContext,
     position: usize,
 }
 
-impl Interpreter {
-    pub fn new(statements: Vec<Statement>) -> Self {
+impl<'a> Interpreter<'a> {
+    pub fn new(
+        statements: Vec<Statement>,
+        file_path: PathBuf,
+        cache: &'a mut Vec<PathBuf>,
+        eval_main: bool,
+    ) -> Self {
         let mut interpreter = Self {
             statements,
+            file_path,
+            cache,
+            eval_main,
             stack: vec![HashMap::new()], // TopLevel scope
             builtins: HashMap::new(),
             context: ScopeContext::TopLevel,
@@ -37,6 +50,10 @@ impl Interpreter {
         ]);
 
         interpreter
+    }
+
+    pub fn get_stack(&self) -> HashMap<String, Literal> {
+        self.stack[0].clone()
     }
 
     fn register_builtins(
@@ -85,6 +102,7 @@ impl Interpreter {
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
             Statement::Break => return Err("Can only use break in loops!".to_string()),
+            Statement::Load(file_path) => self.eval_load(file_path)?,
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -121,7 +139,7 @@ impl Interpreter {
             Literal::Function(id.clone(), args, statements.clone()),
         );
 
-        if id.clone() == "main".to_string() {
+        if self.eval_main && id.clone() == "main".to_string() {
             self.eval_call(id.clone(), vec![])?;
         }
 
@@ -180,6 +198,24 @@ impl Interpreter {
                     self.stack.last_mut().unwrap().remove(id.as_str());
                 }
             }
+        }
+
+        Ok(None)
+    }
+
+    fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
+        if raw_file_path == self.file_path.to_string_lossy().to_string() {
+            return Ok(None);
+        }
+
+        match run(&raw_file_path, self.cache) {
+            Ok(Some(stack)) => {
+                for (id, value) in stack {
+                    self.push(id, value);
+                }
+            }
+            Ok(None) => {}
+            Err(e) => return Err(e),
         }
 
         Ok(None)

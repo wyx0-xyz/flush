@@ -1,17 +1,18 @@
 use super::typing::*;
 use crate::error::{FlushError, Result};
 use crate::lexing::typing::*;
+use std::path::PathBuf;
 
 pub struct Parser<'a> {
     tokens: &'a Vec<Token>,
-    file_path: &'a str,
+    file_path: PathBuf,
     statements: Vec<Statement>,
     position: usize,
 }
 
 #[allow(unreachable_patterns)]
 impl<'a> Parser<'a> {
-    pub fn new(tokens: &'a Vec<Token>, file_path: &'a str) -> Self {
+    pub fn new(tokens: &'a Vec<Token>, file_path: PathBuf) -> Self {
         Self {
             tokens,
             file_path,
@@ -40,7 +41,7 @@ impl<'a> Parser<'a> {
     fn expect(&mut self, expected: TokenKind) -> Result<Token> {
         if self.is_at_end() {
             return Err(FlushError(
-                self.file_path.to_string(),
+                self.file_path.clone(),
                 self.previous().line,
                 format!("Expected {:?} found nothing", expected),
             ));
@@ -52,7 +53,7 @@ impl<'a> Parser<'a> {
 
         if next.kind != expected {
             return Err(FlushError(
-                self.file_path.to_string(),
+                self.file_path.clone(),
                 next.line,
                 format!("Unexpected token {:?}, expected {:?}", next.kind, expected),
             ));
@@ -73,13 +74,14 @@ impl<'a> Parser<'a> {
             TokenKind::While => self.parse_while()?,
             TokenKind::For => self.parse_for()?,
             TokenKind::Break => Statement::Break,
+            TokenKind::Load => self.parse_load()?,
             unknow => {
                 self.position -= 1;
                 match self.parse_expr() {
                     Ok(expr) => Statement::Expr(expr),
                     _ => {
                         return Err(FlushError(
-                            self.file_path.to_string(),
+                            self.file_path.clone(),
                             self.previous().line,
                             format!("Unknow statement {:?}", unknow),
                         ));
@@ -131,7 +133,7 @@ impl<'a> Parser<'a> {
                 TokenKind::Ident(id) => id,
                 kind => {
                     return Err(FlushError(
-                        self.file_path.to_string(),
+                        self.file_path.clone(),
                         token.line,
                         format!("Expected identifier found '{:?}'", kind),
                     ))
@@ -139,7 +141,7 @@ impl<'a> Parser<'a> {
             },
             _ => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     self.previous().line,
                     "Expected identifier".to_string(),
                 ))
@@ -150,7 +152,7 @@ impl<'a> Parser<'a> {
             Some(token) => token,
             None => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     self.previous().line,
                     "Unexpected token def".to_string(),
                 ))
@@ -162,7 +164,7 @@ impl<'a> Parser<'a> {
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     token.line,
                     format!("Unexpected token: {:?}", unexpected),
                 ))
@@ -178,7 +180,7 @@ impl<'a> Parser<'a> {
                 TokenKind::Ident(id) => args.push(id),
                 unexpected => {
                     return Err(FlushError(
-                        self.file_path.to_string(),
+                        self.file_path.clone(),
                         self.previous().line,
                         format!("Unexpected token '{:?}'", unexpected),
                     ))
@@ -202,7 +204,7 @@ impl<'a> Parser<'a> {
                 Some(token) => token,
                 None => {
                     return Err(FlushError(
-                        self.file_path.to_string(),
+                        self.file_path.clone(),
                         self.previous().line,
                         "Unfinished function body".to_string(),
                     ))
@@ -249,7 +251,7 @@ impl<'a> Parser<'a> {
             Expr::Var(id) => id,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     self.previous().line,
                     format!("Expected Identifier found '{:?}'", unexpected),
                 ))
@@ -274,12 +276,27 @@ impl<'a> Parser<'a> {
         Ok(Statement::For(id, iterator, body))
     }
 
+    fn parse_load(&mut self) -> Result<Statement> {
+        let raw_file_path = match self.parse_expr()? {
+            Expr::String(path) => path,
+            unexpected => {
+                return Err(FlushError(
+                    self.file_path.clone(),
+                    self.previous().line,
+                    format!("Expected String found '{:?}'", unexpected),
+                ))
+            }
+        };
+
+        Ok(Statement::Load(raw_file_path))
+    }
+
     fn parse_expr(&mut self) -> Result<Expr> {
         let next = match self.advance() {
             Some(token) => token,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     self.previous().line,
                     format!("Expected expression found '{:?}'", unexpected),
                 ))
@@ -307,7 +324,7 @@ impl<'a> Parser<'a> {
             TokenKind::LBracket => self.parse_list()?,
             unexpected => {
                 return Err(FlushError(
-                    self.file_path.to_string(),
+                    self.file_path.clone(),
                     next.line,
                     format!("Expected expression found '{:?}'", unexpected),
                 ))
@@ -400,15 +417,21 @@ impl<'a> Parser<'a> {
 
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
+
     use super::Parser;
     use crate::error::Result;
     use crate::lexing::lexer::Lexer;
     use crate::parsing::typing::*;
 
+    fn tester_file_path() -> PathBuf {
+        PathBuf::from("__test__.flush")
+    }
+
     #[test]
     fn control_flow() -> Result<()> {
-        let mut lexer = Lexer::new(r#"if (true) {} else {}"#, "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new(r#"if (true) {} else {}"#, tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,
@@ -420,8 +443,8 @@ mod test {
 
     #[test]
     fn var_def() -> Result<()> {
-        let mut lexer = Lexer::new(r#"def username = "wyxo""#, "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new(r#"def username = "wyxo""#, tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,
@@ -436,8 +459,8 @@ mod test {
 
     #[test]
     fn func_def() -> Result<()> {
-        let mut lexer = Lexer::new(r#"def add(a, b) { return a + b }"#, "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new(r#"def add(a, b) { return a + b }"#, tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,
@@ -457,8 +480,8 @@ mod test {
 
     #[test]
     fn unterminated_func_def() -> Result<()> {
-        let mut lexer = Lexer::new("def f(x) { return x * x", "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new("def f(x) { return x * x", tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         match parser.parse() {
             Ok(_) => panic!(),
@@ -470,8 +493,8 @@ mod test {
 
     #[test]
     fn while_loop() -> Result<()> {
-        let mut lexer = Lexer::new(r#"while (false) { break }"#, "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new(r#"while (false) { break }"#, tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,
@@ -486,8 +509,8 @@ mod test {
 
     #[test]
     fn for_loop() -> Result<()> {
-        let mut lexer = Lexer::new(r#"for (i in [1]) { break }"#, "__test__.flush");
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut lexer = Lexer::new(r#"for (i in [1]) { break }"#, tester_file_path());
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,
@@ -505,9 +528,9 @@ mod test {
     fn expressions() -> Result<()> {
         let mut lexer = Lexer::new(
             r#""Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
-            "__test__.flush",
+            tester_file_path(),
         );
-        let mut parser = Parser::new(lexer.tokenize()?, "__test__.flush");
+        let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
 
         assert_eq!(
             parser.parse()?,

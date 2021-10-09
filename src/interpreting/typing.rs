@@ -9,13 +9,13 @@ pub enum Literal {
     Boolean(bool),
     List(Vec<Box<Literal>>),
     Function(String, Vec<String>, Vec<Statement>),
-    None
+    None,
 }
 
 #[derive(Clone, PartialEq)]
 pub enum ScopeContext {
     Definition,
-    TopLevel
+    TopLevel,
 }
 
 impl fmt::Display for Literal {
@@ -38,7 +38,9 @@ impl fmt::Display for Literal {
 
                 write!(f, "]")
             }
-            Literal::Function(name, args, _) => write!(f, "<function:{}#{}>", name, args.join(", ")),
+            Literal::Function(name, args, _) => {
+                write!(f, "<function:{}#{}>", name, args.join(", "))
+            }
             Literal::None => write!(f, "None"),
         }
     }
