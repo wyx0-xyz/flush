@@ -171,7 +171,7 @@ impl<'a> Lexer<'a> {
                     }
                 }
                 '%' => self.push_token(TokenKind::Op(Op::Mod)),
-                '^' => self.push_token(TokenKind::Op(Op::Square)),
+                '^' => self.push_token(TokenKind::Op(Op::Pow)),
                 '<' => {
                     if self.current() == Some('=') {
                         self.push_token(TokenKind::Op(Op::Le));
@@ -330,7 +330,7 @@ mod test {
                 TokenKind::Op(Op::Mul),
                 TokenKind::Op(Op::Div),
                 TokenKind::Op(Op::Mod),
-                TokenKind::Op(Op::Square),
+                TokenKind::Op(Op::Pow),
                 TokenKind::Op(Op::Lt),
                 TokenKind::Op(Op::Gt),
                 TokenKind::Op(Op::Eq),

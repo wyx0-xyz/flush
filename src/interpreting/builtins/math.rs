@@ -77,6 +77,21 @@ impl<'a> Interpreter<'a> {
         })
     }
 
+    pub fn pow(&mut self, left: Box<Expr>, right: Box<Expr>) -> Result<Literal, String> {
+        let left_literal = self.get_literal(*left)?;
+        let right_literal = self.get_literal(*right)?;
+
+        Ok(match (left_literal, right_literal) {
+            (Literal::Int(left), Literal::Int(right)) => Literal::Int(left.pow(right as u32)),
+            (Literal::Float(left), Literal::Float(right)) => Literal::Float(left.powf(right)),
+            (Literal::Int(left), Literal::Float(right)) => {
+                Literal::Float((left as f64).powf(right))
+            }
+            (Literal::Float(left), Literal::Int(right)) => Literal::Float(left.powf(right as f64)),
+            _ => return Err("Pow functions works only with numbers".to_string()),
+        })
+    }
+
     pub fn cos(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() <= 0 {
             return Err("Cosine function needs one argument".to_string());

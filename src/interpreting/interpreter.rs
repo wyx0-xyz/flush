@@ -331,7 +331,7 @@ impl<'a> Interpreter<'a> {
             BinOp::Mul => self.mul(left, right)?,
             BinOp::Div => self.div(left, right)?,
             BinOp::Mod => self.r#mod(left, right)?,
-            BinOp::Square => Literal::None, // Not implemented yet
+            BinOp::Pow => self.pow(left, right)?,
             BinOp::Lt => self.lt(left, right)?,
             BinOp::Gt => self.gt(left, right)?,
             BinOp::Eq => self.eq(left, right)?,
