@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use super::typing::*;
 use crate::error::{FlushError, Result};
+use crate::flush::process_file_path;
 use crate::lexing::typing::*;
 
 pub struct Parser<'a> {
@@ -75,6 +76,7 @@ impl<'a> Parser<'a> {
             TokenKind::While => self.parse_while()?,
             TokenKind::For => self.parse_for()?,
             TokenKind::Break => Statement::Break,
+            TokenKind::Load => self.parse_load()?,
             unknow => {
                 self.position -= 1;
                 match self.parse_expr() {
@@ -274,6 +276,26 @@ impl<'a> Parser<'a> {
         self.expect(TokenKind::RBrace)?;
 
         Ok(Statement::For(id, iterator, body))
+    }
+
+    fn parse_load(&mut self) -> Result<Statement> {
+        let raw_file_path = match self.parse_expr()? {
+            Expr::String(path) => path,
+            unexpected => {
+                return Err(FlushError(
+                    self.file_path.clone(),
+                    self.previous().line,
+                    format!("Expected String found '{:?}'", unexpected),
+                ))
+            }
+        };
+
+        let file_path = match process_file_path(&raw_file_path) {
+            Ok(path) => path,
+            Err(e) => return Err(FlushError(self.file_path.clone(), self.previous().line, e)),
+        };
+
+        Ok(Statement::Load(file_path))
     }
 
     fn parse_expr(&mut self) -> Result<Expr> {

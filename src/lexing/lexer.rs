@@ -140,6 +140,7 @@ impl<'a> Lexer<'a> {
             "for" => TokenKind::For,
             "in" => TokenKind::In,
             "break" => TokenKind::Break,
+            "load" => TokenKind::Load,
             "true" => TokenKind::Boolean(true),
             "false" => TokenKind::Boolean(false),
             ident => TokenKind::Ident(ident.to_string()),
@@ -295,7 +296,7 @@ mod test {
     #[test]
     fn keywords() -> Result<()> {
         let mut lexer = Lexer::new(
-            "if else def false user true return while for in break user_id",
+            "if else def false user true return while for in break load user_id",
             tester_file_path(),
         );
         assert_eq!(

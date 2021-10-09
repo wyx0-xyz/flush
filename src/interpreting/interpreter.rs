@@ -1,6 +1,7 @@
 use crate::interpreting::typing::*;
 use crate::parsing::typing::*;
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 pub struct Interpreter {
     statements: Vec<Statement>,
@@ -89,6 +90,7 @@ impl Interpreter {
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
             Statement::Break => return Err("Can only use break in loops!".to_string()),
+            Statement::Load(file_path) => self.eval_load(file_path)?,
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
@@ -186,6 +188,10 @@ impl Interpreter {
             }
         }
 
+        Ok(None)
+    }
+
+    fn eval_load(&mut self, file_path: PathBuf) -> Result<Option<Literal>, String> {
         Ok(None)
     }
 

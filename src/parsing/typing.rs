@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     If(Expr, Vec<Box<Statement>>, Vec<Box<Statement>>), // if (...) { ... }
@@ -7,6 +9,7 @@ pub enum Statement {
     While(Expr, Vec<Box<Statement>>),                   // while (true) { ... }
     For(String, Expr, Vec<Box<Statement>>),             // for (i in ...) { ... }
     Break,                                              // break
+    Load(PathBuf),                                      // load "..."
     Expr(Expr),
 }
 

@@ -16,6 +16,7 @@ pub enum TokenKind {
     For,            // for
     In,             // in
     Break,          // break
+    Load,           // load
     String(String), // "Hello, World!"
     Int(i32),       // 42
     Float(f64),     // 3.14
