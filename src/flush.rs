@@ -7,7 +7,7 @@ use crate::interpreting::typing::Literal;
 use crate::lexing::lexer::Lexer;
 use crate::parsing::parser::Parser;
 
-fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
+pub fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
     let file_path = PathBuf::from(raw_file_path);
 
     if !file_path.exists() {
@@ -28,6 +28,11 @@ pub fn run(
     cache: &mut HashMap<PathBuf, HashMap<String, Literal>>,
 ) -> Result<(), String> {
     let file_path = process_file_path(raw_file_path)?;
+
+    if cache.contains_key(&file_path) {
+        return Ok(());
+    }
+
     let file_content = match read_to_string(file_path.clone()) {
         Ok(content) => content,
         Err(e) => return Err(format!("Couldn't open file: {}", e)),
