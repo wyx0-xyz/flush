@@ -39,6 +39,10 @@ impl Interpreter {
         interpreter
     }
 
+    pub fn get_stack(&self) -> HashMap<String, Literal> {
+        self.stack[0].clone()
+    }
+
     fn register_builtins(
         &mut self,
         builtins: Vec<(
