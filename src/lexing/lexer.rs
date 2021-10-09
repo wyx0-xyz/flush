@@ -1,7 +1,6 @@
-use std::path::PathBuf;
-
 use super::typing::*;
 use crate::error::{FlushError, Result};
+use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct Lexer<'a> {

@@ -4,11 +4,9 @@ mod interpreting;
 mod lexing;
 mod parsing;
 
-use std::{collections::HashMap, path::PathBuf};
-
-use clap::{App, Arg};
-
 use crate::interpreting::typing::Literal;
+use clap::{App, Arg};
+use std::{collections::HashMap, path::PathBuf};
 
 fn main() {
     let matches = App::new("flush-lang")

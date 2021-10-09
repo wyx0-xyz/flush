@@ -1,11 +1,10 @@
-use std::collections::HashMap;
-use std::fs::{canonicalize, read_to_string};
-use std::path::PathBuf;
-
 use crate::interpreting::interpreter::Interpreter;
 use crate::interpreting::typing::Literal;
 use crate::lexing::lexer::Lexer;
 use crate::parsing::parser::Parser;
+use std::collections::HashMap;
+use std::fs::{canonicalize, read_to_string};
+use std::path::PathBuf;
 
 pub fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
     let file_path = PathBuf::from(raw_file_path);

@@ -1,9 +1,8 @@
-use std::path::PathBuf;
-
 use super::typing::*;
 use crate::error::{FlushError, Result};
 use crate::flush::process_file_path;
 use crate::lexing::typing::*;
+use std::path::PathBuf;
 
 pub struct Parser<'a> {
     tokens: &'a Vec<Token>,
