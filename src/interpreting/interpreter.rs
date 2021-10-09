@@ -8,6 +8,7 @@ pub struct Interpreter<'a> {
     statements: Vec<Statement>,
     file_path: PathBuf,
     cache: &'a mut Vec<PathBuf>,
+    eval_main: bool,
     stack: Vec<HashMap<String, Literal>>,
     builtins: HashMap<String, fn(&mut Self, Vec<Box<Expr>>) -> Result<Literal, String>>,
     context: ScopeContext,
@@ -19,11 +20,13 @@ impl<'a> Interpreter<'a> {
         statements: Vec<Statement>,
         file_path: PathBuf,
         cache: &'a mut Vec<PathBuf>,
+        eval_main: bool,
     ) -> Self {
         let mut interpreter = Self {
             statements,
             file_path,
             cache,
+            eval_main,
             stack: vec![HashMap::new()], // TopLevel scope
             builtins: HashMap::new(),
             context: ScopeContext::TopLevel,
@@ -136,7 +139,7 @@ impl<'a> Interpreter<'a> {
             Literal::Function(id.clone(), args, statements.clone()),
         );
 
-        if id.clone() == "main".to_string() {
+        if self.eval_main && id.clone() == "main".to_string() {
             self.eval_call(id.clone(), vec![])?;
         }
 

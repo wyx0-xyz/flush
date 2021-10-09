@@ -71,7 +71,8 @@ pub fn run(
         new_statements.push(statement);
     }
 
-    let mut interpreter = Interpreter::new(new_statements, file_path.clone(), cache);
+    let mut interpreter =
+        Interpreter::new(new_statements, file_path.clone(), cache, cache.len() == 1);
 
     interpreter.interpret()?;
 
