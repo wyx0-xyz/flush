@@ -11,5 +11,4 @@ license = "MIT"
 keywords = ["flush", "language"]
 
 [dependencies]
-clap = "2.33.3"
 ansi_term = "0.12.1"

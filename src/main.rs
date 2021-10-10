@@ -4,25 +4,19 @@ mod interpreting;
 mod lexing;
 mod parsing;
 
-use clap::{App, Arg};
+use ansi_term::Color::Red;
+use std::env::args;
 use std::path::PathBuf;
 
 fn main() {
-    let matches = App::new("flush-lang")
-        .author(env!("CARGO_PKG_AUTHORS"))
-        .version(env!("CARGO_PKG_VERSION"))
-        .about("flush-lang programming language")
-        .arg(
-            Arg::with_name("file")
-                .required(true)
-                .help("File to be interpreted"),
-        )
-        .get_matches();
+    let raw_file_path = match args().nth(1) {
+        Some(path) => path,
+        None => return eprintln!("{}: Usage: flush <file_path>", Red.paint("[error]")),
+    };
 
-    let raw_file_path = matches.value_of("file").unwrap();
     let mut cache: Vec<PathBuf> = vec![];
 
-    match flush::run(raw_file_path, &mut cache) {
+    match flush::run(&raw_file_path, &mut cache) {
         Ok(_) => {}
         Err(e) => eprintln!("{}", e),
     }
