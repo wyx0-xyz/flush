@@ -10,11 +10,11 @@ impl fmt::Display for FlushError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "=> {}:{}\n{}: {}",
+            "{}: {}\n=> {}:{}",
+            Red.paint("[error]"),
+            self.2,
             Blue.paint(self.0.to_str().unwrap()),
             Yellow.paint(self.1.to_string()),
-            Red.paint("error"),
-            self.2
         )
     }
 }
