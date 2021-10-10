@@ -312,6 +312,7 @@ mod test {
                 TokenKind::For,
                 TokenKind::In,
                 TokenKind::Break,
+                TokenKind::Load,
                 TokenKind::Ident("user_id".to_string())
             ]
         );
