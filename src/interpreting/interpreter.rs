@@ -47,6 +47,7 @@ impl<'a> Interpreter<'a> {
             ("asin", Self::asin),
             ("atan", Self::atan),
             ("range", Self::range),
+            ("random", Self::random),
         ]);
 
         interpreter
