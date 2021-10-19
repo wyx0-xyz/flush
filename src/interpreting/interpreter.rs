@@ -99,6 +99,7 @@ impl<'a> Interpreter<'a> {
         Ok(match statement {
             Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
             Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
+            Statement::VarSet(id, expr) => self.eval_var_set(id, expr)?,
             Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
@@ -143,6 +144,16 @@ impl<'a> Interpreter<'a> {
         if self.eval_main && id.clone() == "main".to_string() {
             self.eval_call(id.clone(), vec![])?;
         }
+
+        Ok(None)
+    }
+
+    fn eval_var_set(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
+        self.get_var(id.clone())?;
+
+        let literal = self.get_literal(expr)?;
+
+        self.push(id, literal);
 
         Ok(None)
     }

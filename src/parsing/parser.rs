@@ -69,7 +69,8 @@ impl<'a> Parser<'a> {
     fn parse_statement(&mut self) -> Result<Statement> {
         Ok(match self.advance().unwrap().kind {
             TokenKind::If => self.parse_control_flow()?,
-            TokenKind::Def => self.parse_def()?,
+            TokenKind::Def => self.parse_def_set(true)?,
+            TokenKind::Set => self.parse_def_set(false)?,
             TokenKind::Return => Statement::Return(self.parse_expr()?),
             TokenKind::While => self.parse_while()?,
             TokenKind::For => self.parse_for()?,
@@ -127,7 +128,7 @@ impl<'a> Parser<'a> {
         Ok(Statement::If(condition, if_body, else_body))
     }
 
-    fn parse_def(&mut self) -> Result<Statement> {
+    fn parse_def_set(&mut self, def: bool) -> Result<Statement> {
         let id = match self.advance() {
             Some(token) => match token.kind {
                 TokenKind::Ident(id) => id,
@@ -160,7 +161,11 @@ impl<'a> Parser<'a> {
         };
 
         Ok(match token.kind {
-            TokenKind::Assign => Statement::VarDef(id, self.parse_expr()?),
+            TokenKind::Assign => (if def {
+                Statement::VarDef
+            } else {
+                Statement::VarSet
+            })(id, self.parse_expr()?),
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
