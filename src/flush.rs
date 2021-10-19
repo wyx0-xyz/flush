@@ -48,13 +48,13 @@ pub fn run(
     let mut lexer = Lexer::new(&file_content, file_path.clone());
     let tokens = match lexer.tokenize() {
         Ok(tokens) => tokens,
-        Err(e) => return Err(format!("{}: {}", Red.paint("[error]"), e)),
+        Err(e) => return Err(e.to_string()),
     };
 
     let mut parser = Parser::new(tokens, file_path.clone());
     let statements = match parser.parse() {
         Ok(statements) => statements,
-        Err(e) => return Err(format!("{}: {}", Red.paint("[error]"), e)),
+        Err(e) => return Err(e.to_string()),
     };
 
     cache.push(file_path.clone());

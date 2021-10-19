@@ -298,7 +298,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    format!("Expected expression found '{:?}'", unexpected),
+                    format!("Expected Expression found '{:?}'", unexpected),
                 ))
             }
         };
@@ -326,7 +326,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     next.line,
-                    format!("Expected expression found '{:?}'", unexpected),
+                    format!("Expected Expression found '{:?}'", unexpected),
                 ))
             }
         };
