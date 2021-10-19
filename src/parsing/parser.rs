@@ -322,6 +322,42 @@ impl<'a> Parser<'a> {
                 }
             }
             TokenKind::LBracket => self.parse_list()?,
+            TokenKind::Op(op) => {
+                if self.is_at_end() {
+                    return Err(FlushError(
+                        self.file_path.clone(),
+                        self.previous().line,
+                        "Expected Number found nothing".to_string(),
+                    ));
+                }
+
+                let expr = self.parse_number()?;
+
+                match expr {
+                    Expr::Int(int) => {
+                        if Op::Sub == op {
+                            return Ok(Expr::Int(-int));
+                        }
+                        return Err(FlushError(
+                            self.file_path.clone(),
+                            self.previous().line,
+                            format!("Expected Expression found '{:?}'", op),
+                        ));
+                    }
+                    Expr::Float(float) => {
+                        if Op::Sub == op {
+                            return Ok(Expr::Float(-float));
+                        }
+
+                        return Err(FlushError(
+                            self.file_path.clone(),
+                            self.previous().line,
+                            format!("Expected Expression found '{:?}'", op),
+                        ));
+                    }
+                    _ => unreachable!(),
+                }
+            }
             unexpected => {
                 return Err(FlushError(
                     self.file_path.clone(),
@@ -360,6 +396,20 @@ impl<'a> Parser<'a> {
         self.expect(TokenKind::RBracket)?;
 
         Ok(Expr::List(expressions))
+    }
+
+    fn parse_number(&mut self) -> Result<Expr> {
+        Ok(match self.parse_expr()? {
+            Expr::Int(int) => Expr::Int(int),
+            Expr::Float(float) => Expr::Float(float),
+            unexpected => {
+                return Err(FlushError(
+                    self.file_path.clone(),
+                    self.previous().line,
+                    format!("Expected Number found '{:?}'", unexpected),
+                ))
+            }
+        })
     }
 
     fn parse_bin_op(&mut self, expr: Expr, bin_op: Op) -> Result<Expr> {
@@ -527,7 +577,7 @@ mod test {
     #[test]
     fn expressions() -> Result<()> {
         let mut lexer = Lexer::new(
-            r#""Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
+            r#"-7 "Hello, Flush!" 54 3.14 false user add(1, true, 4.0) [1, user, sin(28)]"#,
             tester_file_path(),
         );
         let mut parser = Parser::new(lexer.tokenize()?, tester_file_path());
@@ -535,6 +585,7 @@ mod test {
         assert_eq!(
             parser.parse()?,
             &vec![
+                Statement::Expr(Expr::Int(-7)),
                 Statement::Expr(Expr::String("Hello, Flush!".to_string()),),
                 Statement::Expr(Expr::Int(54)),
                 Statement::Expr(Expr::Float(3.14)),
