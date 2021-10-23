@@ -163,6 +163,8 @@ impl<'a> Interpreter<'a> {
         condition: Expr,
         statements: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
+        self.stack.push(HashMap::new());
+
         while self.eval_condition(condition.clone())? {
             for statement in statements.clone() {
                 if let Statement::Return(expr) = *statement {
@@ -174,6 +176,8 @@ impl<'a> Interpreter<'a> {
                 self.eval_statement(*statement)?;
             }
         }
+
+        self.stack.pop();
 
         Ok(None)
     }
@@ -190,6 +194,8 @@ impl<'a> Interpreter<'a> {
         }
 
         if let Literal::List(list) = self.get_literal(expr)? {
+            self.stack.push(HashMap::new());
+
             for element in list {
                 for statement in statements.clone() {
                     if Statement::Break == *statement {
@@ -210,6 +216,8 @@ impl<'a> Interpreter<'a> {
                     self.stack.last_mut().unwrap().remove(id.as_str());
                 }
             }
+
+            self.stack.pop();
         }
 
         Ok(None)
