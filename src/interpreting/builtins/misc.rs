@@ -51,4 +51,36 @@ impl<'a> Interpreter<'a> {
             _ => Err(format!("Random min and max must be Numbers.")),
         }
     }
+
+    pub fn parse_int(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+        if args.len() < 1 {
+            return Err(format!("Expected 1 argument but given {}", args.len()));
+        }
+
+        let raw_int = match self.get_literal(*args[0].clone())? {
+            Literal::String(string) => string,
+            unexpected => return Err(format!("Expected String found '{}'", unexpected)),
+        };
+
+        Ok(match raw_int.parse::<i32>() {
+            Ok(int) => Literal::Int(int),
+            Err(_) => return Err(format!("Invalid Integer '{}'", raw_int)),
+        })
+    }
+
+    pub fn parse_float(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+        if args.len() < 1 {
+            return Err(format!("Expected 1 argument but given {}", args.len()));
+        }
+
+        let raw_float = match self.get_literal(*args[0].clone())? {
+            Literal::String(string) => string,
+            unexpected => return Err(format!("Expected String found '{}'", unexpected)),
+        };
+
+        Ok(match raw_float.parse::<f64>() {
+            Ok(float) => Literal::Float(float),
+            Err(_) => return Err(format!("Invalid Float '{}'", raw_float)),
+        })
+    }
 }

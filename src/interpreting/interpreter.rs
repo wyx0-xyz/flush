@@ -48,6 +48,8 @@ impl<'a> Interpreter<'a> {
             ("atan", Self::atan),
             ("range", Self::range),
             ("random", Self::random),
+            ("parseInt", Self::parse_int),
+            ("parseFloat", Self::parse_float),
         ]);
 
         interpreter
