@@ -151,13 +151,16 @@ impl<'a> Interpreter<'a> {
     }
 
     fn eval_var_set(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
-        self.get_var(id.clone())?;
-
         let literal = self.get_literal(expr)?;
 
-        self.push(id, literal);
+        for stack in self.stack.iter_mut().rev() {
+            if stack.clone().contains_key(&*id) {
+                stack.insert(id, literal);
+                return Ok(None);
+            }
+        }
 
-        Ok(None)
+        Err(format!("Variable {} not found!", id))
     }
 
     fn eval_while(
