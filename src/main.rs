@@ -15,8 +15,7 @@ fn main() {
 
     let mut cache = vec![];
 
-    match flush::run(&raw_file_path, &mut cache) {
-        Ok(_) => {}
-        Err(e) => eprintln!("{}", e),
+    if let Err(e) = flush::run(&raw_file_path, &mut cache) {
+        eprintln!("{}", e);
     }
 }
