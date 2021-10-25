@@ -52,6 +52,7 @@ impl<'a> Interpreter<'a> {
             ("random", Self::random),
             ("parseInt", Self::parse_int),
             ("parseFloat", Self::parse_float),
+            ("toString", Self::to_string),
         ]);
 
         interpreter

@@ -83,4 +83,14 @@ impl<'a> Interpreter<'a> {
             Err(_) => return Err(format!("Invalid Float '{}'", raw_float)),
         })
     }
+
+    pub fn to_string(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
+        if args.len() < 1 {
+            return Err(format!("Expected 1 argument but given {}", args.len()));
+        }
+
+        Ok(Literal::String(
+            self.get_literal(*args[0].clone())?.to_string(),
+        ))
+    }
 }
