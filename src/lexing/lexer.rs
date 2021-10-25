@@ -167,6 +167,9 @@ impl<'a> Lexer<'a> {
                     if self.current() == Some('=') {
                         self.push_token(TokenKind::Op(Op::Ne));
                         self.position += 1;
+                    } else if self.current() == Some('/') {
+                        self.push_token(TokenKind::Op(Op::FloorDiv));
+                        self.position += 1;
                     } else {
                         self.push_token(TokenKind::Op(Op::Div))
                     }

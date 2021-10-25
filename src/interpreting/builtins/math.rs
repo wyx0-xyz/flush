@@ -51,15 +51,32 @@ impl<'a> Interpreter<'a> {
         })
     }
 
-    pub fn div(&mut self, left: Box<Expr>, right: Box<Expr>) -> Result<Literal, String> {
+    pub fn div(
+        &mut self,
+        left: Box<Expr>,
+        right: Box<Expr>,
+        floor: bool,
+    ) -> Result<Literal, String> {
         let left_literal = self.get_literal(*left)?;
         let right_literal = self.get_literal(*right)?;
 
         Ok(match (left_literal, right_literal) {
             (Literal::Int(left), Literal::Int(right)) => Literal::Int(left / right),
-            (Literal::Float(left), Literal::Float(right)) => Literal::Float(left / right),
-            (Literal::Int(left), Literal::Float(right)) => Literal::Float((left as f64) / right),
-            (Literal::Float(left), Literal::Int(right)) => Literal::Float(left / (right as f64)),
+            (Literal::Float(left), Literal::Float(right)) => Literal::Float(if floor {
+                (left / right).floor()
+            } else {
+                left / right
+            }),
+            (Literal::Int(left), Literal::Float(right)) => Literal::Float(if floor {
+                ((left as f64) / right).floor()
+            } else {
+                (left as f64) / right
+            }),
+            (Literal::Float(left), Literal::Int(right)) => Literal::Float(if floor {
+                (left / (right as f64)).floor()
+            } else {
+                left / (right as f64)
+            }),
             (left, right) => return Err(format!("Can't divide {} and {}", left, right)),
         })
     }

@@ -427,6 +427,7 @@ impl<'a> Parser<'a> {
                 Op::Sub => BinOp::Sub,
                 Op::Mul => BinOp::Mul,
                 Op::Div => BinOp::Div,
+                Op::FloorDiv => BinOp::FloorDiv,
                 Op::Mod => BinOp::Mod,
                 Op::Pow => BinOp::Pow,
                 Op::Lt => BinOp::Lt,

@@ -26,16 +26,17 @@ pub enum Expr {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum BinOp {
-    Add, // +
-    Sub, // -
-    Mul, // *
-    Div, // /
-    Mod, // %
-    Pow, // ^
-    Lt,  // <
-    Gt,  // >
-    Eq,  // ==
-    Ne,  // /=
-    Le,  // <=
-    Ge,  // >=
+    Add,      // +
+    Sub,      // -
+    Mul,      // *
+    Div,      // /
+    FloorDiv, // //
+    Mod,      // %
+    Pow,      // ^
+    Lt,       // <
+    Gt,       // >
+    Eq,       // ==
+    Ne,       // /=
+    Le,       // <=
+    Ge,       // >=
 }
