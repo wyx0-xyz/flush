@@ -21,6 +21,7 @@ pub enum Expr {
     Var(String),                  // userId
     Call(String, Vec<Box<Expr>>), // printLn(...)
     List(Vec<Box<Expr>>),         // [1, 2, 3]
+    ListAt(Box<Expr>, Box<Expr>), // [1, 2, 3]@3
     BinOp(BinOp, Box<Expr>, Box<Expr>),
 }
 

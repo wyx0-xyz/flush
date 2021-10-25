@@ -318,6 +318,7 @@ impl<'a> Interpreter<'a> {
             Expr::Var(id) => self.get_var(id)?,
             Expr::Call(id, args) => self.eval_call(id, args)?,
             Expr::List(list) => Literal::List(self.get_literals(list)?),
+            Expr::ListAt(list, index) => self.eval_list_at(list, index)?,
             Expr::BinOp(op, left, right) => self.eval_binary_op(op, left, right)?,
         })
     }
@@ -371,6 +372,29 @@ impl<'a> Interpreter<'a> {
 
             Err(format!("Undefined function {}!", id))
         }
+    }
+
+    fn eval_list_at(&mut self, list: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
+        let list = match self.get_literal(*list)? {
+            Literal::List(list) => list,
+            unexpected => return Err(format!("Couldn't index '{}'", unexpected)),
+        };
+        let index = match self.get_literal(*index)? {
+            Literal::Int(int) => int,
+            unexpected => return Err(format!("Expected Integer found '{:?}'", unexpected)),
+        };
+
+        if index < 0 {
+            return Err("Couldn't index list with negatives integers".to_string());
+        }
+
+        let index = index as usize;
+
+        if index >= list.len() {
+            return Err("List index out of range".to_string());
+        }
+
+        Ok(*list[index].clone())
     }
 
     fn eval_binary_op(

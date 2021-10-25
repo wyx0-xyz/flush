@@ -400,6 +400,19 @@ impl<'a> Parser<'a> {
 
         self.expect(TokenKind::RBracket)?;
 
+        if !self.is_at_end() {
+            let next = self.advance().unwrap();
+
+            if next.kind == TokenKind::At {
+                let index = self.parse_expr()?;
+                
+                return Ok(Expr::ListAt(
+                    Box::new(Expr::List(expressions)),
+                    Box::new(index),
+                ));
+            }
+        }
+
         Ok(Expr::List(expressions))
     }
 
