@@ -13,9 +13,10 @@ pub enum Literal {
 }
 
 #[derive(Clone, PartialEq)]
-pub enum ScopeContext {
-    Definition,
+pub enum Context {
+    Function,
     TopLevel,
+    Loop,
 }
 
 impl fmt::Display for Literal {

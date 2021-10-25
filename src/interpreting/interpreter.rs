@@ -11,7 +11,8 @@ pub struct Interpreter<'a> {
     eval_main: bool,
     stack: Vec<HashMap<String, Literal>>,
     builtins: HashMap<String, fn(&mut Self, Vec<Box<Expr>>) -> Result<Literal, String>>,
-    context: ScopeContext,
+    contexts: Vec<Context>,
+    loops_conditions: Vec<Expr>,
     position: usize,
 }
 
@@ -27,9 +28,10 @@ impl<'a> Interpreter<'a> {
             file_path,
             cache,
             eval_main,
-            stack: vec![HashMap::new()], // TopLevel scope
+            stack: vec![HashMap::new()],
             builtins: HashMap::new(),
-            context: ScopeContext::TopLevel,
+            contexts: vec![Context::TopLevel],
+            loops_conditions: vec![],
             position: 0,
         };
 
@@ -93,10 +95,6 @@ impl<'a> Interpreter<'a> {
         self.stack[idx].insert(id, literal);
     }
 
-    fn pop(&mut self) {
-        self.stack.pop();
-    }
-
     pub fn eval_statement(&mut self, statement: Statement) -> Result<Option<Literal>, String> {
         Ok(match statement {
             Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
@@ -105,14 +103,14 @@ impl<'a> Interpreter<'a> {
             Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
-            Statement::Break => return Err("Can only use break in loops!".to_string()),
+            Statement::Break => self.eval_break()?,
             Statement::Load(file_path) => self.eval_load(file_path)?,
             Statement::If(condition, body, else_body) => {
                 self.eval_control_flow(condition, body, else_body)?
             }
             Statement::Expr(expr) => {
-                if self.context == ScopeContext::TopLevel {
-                    return Err("Cannot eval expressions outside a definition.".to_string());
+                if !self.contexts.contains(&Context::Function) {
+                    return Err("Cannot eval expressions outside a function.".to_string());
                 }
 
                 self.get_literal(expr)?;
@@ -168,14 +166,25 @@ impl<'a> Interpreter<'a> {
         condition: Expr,
         statements: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
-        self.stack.push(HashMap::new());
+        if !self.eval_condition(condition.clone())? {
+            return Ok(None);
+        }
 
-        while self.eval_condition(condition.clone())? {
+        let mut result: Option<Literal> = None;
+
+        self.stack.push(HashMap::new());
+        self.contexts.push(Context::Loop);
+        self.loops_conditions.push(condition.clone());
+
+        'main_while: loop {
             for statement in statements.clone() {
+                if !self.eval_condition(self.loops_conditions.last().unwrap().clone())? {
+                    break 'main_while;
+                }
+
                 if let Statement::Return(expr) = *statement {
-                    return Ok(Some(self.get_literal(expr)?));
-                } else if Statement::Break == *statement {
-                    break;
+                    result = Some(self.get_literal(expr)?);
+                    break 'main_while;
                 }
 
                 self.eval_statement(*statement)?;
@@ -183,8 +192,10 @@ impl<'a> Interpreter<'a> {
         }
 
         self.stack.pop();
+        self.contexts.pop();
+        self.loops_conditions.pop();
 
-        Ok(None)
+        Ok(result)
     }
 
     fn eval_for(
@@ -200,8 +211,14 @@ impl<'a> Interpreter<'a> {
 
         if let Literal::List(list) = self.get_literal(expr)? {
             self.stack.push(HashMap::new());
+            self.contexts.push(Context::Loop);
+            self.loops_conditions.push(Expr::Boolean(true));
 
             for element in list {
+                if !self.eval_condition(self.loops_conditions.last().unwrap().clone())? {
+                    break;
+                }
+
                 for statement in statements.clone() {
                     if Statement::Break == *statement {
                         return Ok(None);
@@ -223,9 +240,22 @@ impl<'a> Interpreter<'a> {
             }
 
             self.stack.pop();
+            self.contexts.pop();
+            self.loops_conditions.pop();
         }
 
         Ok(None)
+    }
+
+    fn eval_break(&mut self) -> Result<Option<Literal>, String> {
+        if self.contexts.contains(&Context::Loop) {
+            let last_index = self.loops_conditions.len() - 1;
+            self.loops_conditions[last_index] = Expr::Boolean(false);
+
+            return Ok(None);
+        }
+
+        Err("Can only use break in loops!".to_string())
     }
 
     fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
@@ -312,10 +342,8 @@ impl<'a> Interpreter<'a> {
                             return Err(format!("Not enought arguments for {}", id));
                         }
 
-                        let previous_context = self.context.clone();
-
                         self.stack.push(HashMap::new());
-                        self.context = ScopeContext::Definition;
+                        self.contexts.push(Context::Function);
 
                         for index in 0..(args.len()) {
                             let literal = self.get_literal(*(call_args[index].clone()))?;
@@ -332,8 +360,8 @@ impl<'a> Interpreter<'a> {
                             }
                         }
 
-                        self.context = previous_context;
-                        self.pop();
+                        self.stack.pop();
+                        self.contexts.pop();
 
                         return Ok(return_literal);
                     }
