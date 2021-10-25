@@ -82,12 +82,9 @@ pub fn run(
     let mut interpreter =
         Interpreter::new(new_statements, file_path.clone(), cache, cache.len() == 1);
 
-    match interpreter.interpret() {
-        Ok(_) => {}
-        Err(e) => return Err(format!("{}: {}", Red.paint("[error]"), e)),
+    if let Err(e) = interpreter.interpret() {
+        return Err(format!("{}: {}", Red.paint("[error]"), e));
     }
 
-    let stack = interpreter.get_stack();
-
-    Ok(Some(stack))
+    Ok(Some(interpreter.get_stack()))
 }
