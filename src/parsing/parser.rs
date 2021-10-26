@@ -411,6 +411,8 @@ impl<'a> Parser<'a> {
                     Box::new(index),
                 ));
             }
+
+            self.position -= 1;
         }
 
         Ok(Expr::List(expressions))
