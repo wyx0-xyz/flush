@@ -15,7 +15,7 @@ impl<'a> Interpreter<'a> {
                 Literal::String(format!("{}{}", left, right))
             }
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left + (right as f64)),
-            (left, right) => return Err(format!("Can't add {} and {}", left, right)),
+            (left, right) => return Err(format!("Cannot add {} and {}", left, right)),
         })
     }
 
@@ -28,7 +28,7 @@ impl<'a> Interpreter<'a> {
             (Literal::Float(left), Literal::Float(right)) => Literal::Float(left - right),
             (Literal::Int(left), Literal::Float(right)) => Literal::Float((left as f64) - right),
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left - (right as f64)),
-            (left, right) => return Err(format!("Can't substract {} and {}", left, right)),
+            (left, right) => return Err(format!("Cannot substract {} and {}", left, right)),
         })
     }
 
@@ -47,7 +47,7 @@ impl<'a> Interpreter<'a> {
             (Literal::String(left), Literal::Int(right)) => {
                 Literal::String(left.repeat(right as usize))
             }
-            (left, right) => return Err(format!("Can't multiply {} and {}", left, right)),
+            (left, right) => return Err(format!("Cannot multiply {} and {}", left, right)),
         })
     }
 
@@ -77,7 +77,7 @@ impl<'a> Interpreter<'a> {
             } else {
                 left / (right as f64)
             }),
-            (left, right) => return Err(format!("Can't divide {} and {}", left, right)),
+            (left, right) => return Err(format!("Cannot divide {} and {}", left, right)),
         })
     }
 
@@ -90,7 +90,7 @@ impl<'a> Interpreter<'a> {
             (Literal::Float(left), Literal::Float(right)) => Literal::Float(left % right),
             (Literal::Int(left), Literal::Float(right)) => Literal::Float((left as f64) % right),
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left % (right as f64)),
-            (left, right) => return Err(format!("Can't mod {} and {}", left, right)),
+            (left, right) => return Err(format!("Cannot mod {} and {}", left, right)),
         })
     }
 
@@ -105,7 +105,7 @@ impl<'a> Interpreter<'a> {
                 Literal::Float((left as f64).powf(right))
             }
             (Literal::Float(left), Literal::Int(right)) => Literal::Float(left.powf(right as f64)),
-            _ => return Err("Pow functions works only with numbers".to_string()),
+            _ => return Err("Pow function works only with numbers".to_string()),
         })
     }
 

@@ -43,7 +43,7 @@ impl<'a> Parser<'a> {
             return Err(FlushError(
                 self.file_path.clone(),
                 self.previous().line,
-                format!("Expected {:?} found nothing", expected),
+                format!("Expected {:?}, found nothing", expected),
             ));
         }
 
@@ -55,7 +55,7 @@ impl<'a> Parser<'a> {
             return Err(FlushError(
                 self.file_path.clone(),
                 next.line,
-                format!("Unexpected token {:?}, expected {:?}", next.kind, expected),
+                format!("Expected {:?}, found {:?}", expected, next.kind),
             ));
         }
 
@@ -136,7 +136,7 @@ impl<'a> Parser<'a> {
                     return Err(FlushError(
                         self.file_path.clone(),
                         token.line,
-                        format!("Expected identifier found '{:?}'", kind),
+                        format!("Expected Identifier, found {:?}", kind),
                     ))
                 }
             },
@@ -144,7 +144,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    "Expected identifier".to_string(),
+                    "Expected Identifier, found nothing".to_string(),
                 ))
             }
         };
@@ -155,7 +155,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    "Unexpected token def".to_string(),
+                    "Expected Equal, found nothing".to_string(),
                 ))
             }
         };
@@ -171,7 +171,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     token.line,
-                    format!("Unexpected token: {:?}", unexpected),
+                    format!("Unexpected token {:?}", unexpected),
                 ))
             }
         })
@@ -187,7 +187,7 @@ impl<'a> Parser<'a> {
                     return Err(FlushError(
                         self.file_path.clone(),
                         self.previous().line,
-                        format!("Unexpected token '{:?}'", unexpected),
+                        format!("Unexpected token {:?}", unexpected),
                     ))
                 }
             };
@@ -258,7 +258,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    format!("Expected Identifier found '{:?}'", unexpected),
+                    format!("Expected Identifier, found {:?}", unexpected),
                 ))
             }
         };
@@ -288,7 +288,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    format!("Expected String found '{:?}'", unexpected),
+                    format!("Expected String, found {:?}", unexpected),
                 ))
             }
         };
@@ -303,7 +303,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    format!("Expected Expression found '{:?}'", unexpected),
+                    format!("Expected Expression, found {:?}", unexpected),
                 ))
             }
         };
@@ -332,7 +332,7 @@ impl<'a> Parser<'a> {
                     return Err(FlushError(
                         self.file_path.clone(),
                         self.previous().line,
-                        "Expected Number found nothing".to_string(),
+                        "Expected Number, found nothing".to_string(),
                     ));
                 }
 
@@ -346,7 +346,7 @@ impl<'a> Parser<'a> {
                         return Err(FlushError(
                             self.file_path.clone(),
                             self.previous().line,
-                            format!("Expected Expression found '{:?}'", op),
+                            format!("Expected Expression, found {:?}", op),
                         ));
                     }
                     Expr::Float(float) => {
@@ -357,7 +357,7 @@ impl<'a> Parser<'a> {
                         return Err(FlushError(
                             self.file_path.clone(),
                             self.previous().line,
-                            format!("Expected Expression found '{:?}'", op),
+                            format!("Expected Expression, found {:?}", op),
                         ));
                     }
                     _ => unreachable!(),
@@ -367,7 +367,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     next.line,
-                    format!("Expected Expression found '{:?}'", unexpected),
+                    format!("Expected Expression, found {:?}", unexpected),
                 ))
             }
         };
@@ -426,7 +426,7 @@ impl<'a> Parser<'a> {
                 return Err(FlushError(
                     self.file_path.clone(),
                     self.previous().line,
-                    format!("Expected Number found '{:?}'", unexpected),
+                    format!("Expected Number, found {:?}", unexpected),
                 ))
             }
         })

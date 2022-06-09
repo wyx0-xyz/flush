@@ -64,7 +64,7 @@ impl<'a> Lexer<'a> {
                         return Err(FlushError(
                             self.file_path.clone(),
                             self.line,
-                            "Illegal newline in string".to_string(),
+                            "Illegal newline in a string".to_string(),
                         ));
                     }
 

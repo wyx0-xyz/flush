@@ -111,7 +111,7 @@ impl<'a> Interpreter<'a> {
             }
             Statement::Expr(expr) => {
                 if !self.contexts.contains(&Context::Function) {
-                    return Err("Cannot eval expressions outside a function.".to_string());
+                    return Err("Cannot eval expressions at the top level".to_string());
                 }
 
                 self.get_literal(expr)?;
@@ -122,7 +122,7 @@ impl<'a> Interpreter<'a> {
 
     fn eval_var_def(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
         if self.stack.last().unwrap().contains_key(&id) {
-            return Err(format!("Variable {} already exists!", id));
+            return Err(format!("Variable {} already exists", id));
         }
 
         let literal = self.get_literal(expr)?;
@@ -159,7 +159,7 @@ impl<'a> Interpreter<'a> {
             }
         }
 
-        Err(format!("Variable {} not found!", id))
+        Err(format!("Variable {} not found", id))
     }
 
     fn eval_while(
@@ -206,7 +206,7 @@ impl<'a> Interpreter<'a> {
         statements: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
         match self.get_var(id.clone()) {
-            Ok(_) => return Err(format!("Variable {} already exists!", id)),
+            Ok(_) => return Err(format!("Variable {} already exists", id)),
             _ => (),
         }
 
@@ -230,7 +230,7 @@ impl<'a> Interpreter<'a> {
                     match self.eval_statement(*statement) {
                         Ok(_) => {}
                         Err(e) => {
-                            if e != "Can only use break in loops!".to_string() {
+                            if e != "Can only use break in loops".to_string() {
                                 return Err(e);
                             }
                         }
@@ -256,7 +256,7 @@ impl<'a> Interpreter<'a> {
             return Ok(None);
         }
 
-        Err("Can only use break in loops!".to_string())
+        Err("Can only use break in loops".to_string())
     }
 
     fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
@@ -304,7 +304,7 @@ impl<'a> Interpreter<'a> {
         match self.get_literal(condition) {
             Ok(Literal::Boolean(boolean)) => Ok(boolean),
             Ok(unexpected) => Err(format!(
-                "Expression must return boolean, actually return '{}'",
+                "Expression must return boolean, it actually returns {}",
                 unexpected
             )),
             Err(error) => Err(error),
@@ -343,7 +343,7 @@ impl<'a> Interpreter<'a> {
                 if scope.contains_key(&id) {
                     if let Literal::Function(_, args, statements) = &scope[&id] {
                         if args.len() > call_args.len() {
-                            return Err(format!("Not enought arguments for {}", id));
+                            return Err(format!("{} expects {} arguments, given {}", id, args.len(), call_args.len()));
                         }
 
                         self.stack.push(HashMap::new());
@@ -372,22 +372,22 @@ impl<'a> Interpreter<'a> {
                 }
             }
 
-            Err(format!("Undefined function {}!", id))
+            Err(format!("Undefined function {}", id))
         }
     }
 
     fn eval_list_at(&mut self, list: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
         let list = match self.get_literal(*list)? {
             Literal::List(list) => list,
-            unexpected => return Err(format!("Couldn't index '{}'", unexpected)),
+            unexpected => return Err(format!("Cannot index {}", unexpected)),
         };
         let index = match self.get_literal(*index)? {
             Literal::Int(int) => int,
-            unexpected => return Err(format!("Expected Integer found '{:?}'", unexpected)),
+            unexpected => return Err(format!("Expected Integer, found {:?}", unexpected)),
         };
 
         if index < 0 {
-            return Err("Couldn't index list with negatives integers".to_string());
+            return Err("Cannot index list with negatives integers".to_string());
         }
 
         let index = index as usize;
@@ -429,7 +429,7 @@ impl<'a> Interpreter<'a> {
             }
         }
 
-        Err(format!("Variable {} not found!", id))
+        Err(format!("Variable {} not found", id))
     }
 
     pub fn interpret(&mut self) -> Result<(), String> {
