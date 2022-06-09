@@ -291,7 +291,9 @@ impl<'a> Interpreter<'a> {
             if let Statement::Return(expr) = *statement {
                 return Ok(Some(self.get_literal(expr)?));
             } else {
-                self.eval_statement(*statement)?;
+                if let Some(literal) = self.eval_statement(*statement)? {
+                    return Ok(Some(literal));
+                }
             }
         }
 
