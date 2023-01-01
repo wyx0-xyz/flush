@@ -7,7 +7,7 @@ use rand::Rng;
 impl<'a> Interpreter<'a> {
     pub fn range(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 2 {
-            return Err(format!("Expected 2 arguments, but given {}.", args.len()));
+            return Err(format!("Expected 2 arguments, given {}", args.len()));
         }
 
         match (
@@ -20,14 +20,14 @@ impl<'a> Interpreter<'a> {
                     .map(|i| Box::new(Literal::Int(i)))
                     .collect(),
             )),
-            _ => Err(format!("Range start and stop must be Integers.")),
+            _ => Err(format!("Range start and stop must be Integers")),
         }
     }
 
     pub fn random(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 2 {
             return Err(format!(
-                "Expected 2 arguments: min and max, but given {}.",
+                "Expected 2 arguments: min and max, given {}",
                 args.len()
             ));
         }
@@ -54,39 +54,39 @@ impl<'a> Interpreter<'a> {
 
     pub fn parse_int(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 1 {
-            return Err(format!("Expected 1 argument but given {}", args.len()));
+            return Err(format!("Expected 1 argument, given {}", args.len()));
         }
 
         let raw_int = match self.get_literal(*args[0].clone())? {
             Literal::String(string) => string,
-            unexpected => return Err(format!("Expected String found '{}'", unexpected)),
+            unexpected => return Err(format!("Expected String, found {}", unexpected)),
         };
 
         Ok(match raw_int.parse::<i32>() {
             Ok(int) => Literal::Int(int),
-            Err(_) => return Err(format!("Invalid Integer '{}'", raw_int)),
+            Err(_) => return Err(format!("Invalid Integer {}", raw_int)),
         })
     }
 
     pub fn parse_float(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 1 {
-            return Err(format!("Expected 1 argument but given {}", args.len()));
+            return Err(format!("Expected 1 argument, given {}", args.len()));
         }
 
         let raw_float = match self.get_literal(*args[0].clone())? {
             Literal::String(string) => string,
-            unexpected => return Err(format!("Expected String found '{}'", unexpected)),
+            unexpected => return Err(format!("Expected String, found {}", unexpected)),
         };
 
         Ok(match raw_float.parse::<f64>() {
             Ok(float) => Literal::Float(float),
-            Err(_) => return Err(format!("Invalid Float '{}'", raw_float)),
+            Err(_) => return Err(format!("Invalid Float {}", raw_float)),
         })
     }
 
     pub fn to_string(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
         if args.len() < 1 {
-            return Err(format!("Expected 1 argument but given {}", args.len()));
+            return Err(format!("Expected 1 argument, given {}", args.len()));
         }
 
         Ok(Literal::String(

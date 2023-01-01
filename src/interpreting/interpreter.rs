@@ -111,7 +111,11 @@ impl<'a> Interpreter<'a> {
             }
             Statement::Expr(expr) => {
                 if !self.contexts.contains(&Context::Function) {
+<<<<<<< HEAD
                     return Err("Cannot evaluate expression outside a function!".to_string());
+=======
+                    return Err("Cannot eval expressions at the top level".to_string());
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
                 }
 
                 self.get_literal(expr)?;
@@ -122,7 +126,11 @@ impl<'a> Interpreter<'a> {
 
     fn eval_var_def(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
         if self.stack.last().unwrap().contains_key(&id) {
+<<<<<<< HEAD
             return Err(format!("The `{}` variable already exists!", id));
+=======
+            return Err(format!("Variable {} already exists", id));
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
         }
 
         let literal = self.get_literal(expr)?;
@@ -159,7 +167,11 @@ impl<'a> Interpreter<'a> {
             }
         }
 
+<<<<<<< HEAD
         Err(format!("The `{}` variable does not exist!", id))
+=======
+        Err(format!("Variable {} not found", id))
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
     }
 
     fn eval_while(
@@ -206,7 +218,11 @@ impl<'a> Interpreter<'a> {
         statements: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
         match self.get_var(id.clone()) {
+<<<<<<< HEAD
             Ok(_) => return Err(format!("The `{}` variable already exists!", id)),
+=======
+            Ok(_) => return Err(format!("Variable {} already exists", id)),
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
             _ => (),
         }
 
@@ -230,7 +246,11 @@ impl<'a> Interpreter<'a> {
                     match self.eval_statement(*statement) {
                         Ok(_) => {}
                         Err(e) => {
+<<<<<<< HEAD
                             if e != "The break keyword cannot be used outside a loop!".to_string() {
+=======
+                            if e != "Can only use break in loops".to_string() {
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
                                 return Err(e);
                             }
                         }
@@ -256,7 +276,11 @@ impl<'a> Interpreter<'a> {
             return Ok(None);
         }
 
+<<<<<<< HEAD
         Err("The break keyword cannot be used outside a loop!".to_string())
+=======
+        Err("Can only use break in loops".to_string())
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
     }
 
     fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
@@ -288,8 +312,17 @@ impl<'a> Interpreter<'a> {
         } else {
             else_body
         } {
+<<<<<<< HEAD
             if let Some(result) = self.eval_statement(*statement.clone())? {
                 return Ok(Some(result));
+=======
+            if let Statement::Return(expr) = *statement {
+                return Ok(Some(self.get_literal(expr)?));
+            } else {
+                if let Some(literal) = self.eval_statement(*statement)? {
+                    return Ok(Some(literal));
+                }
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
             }
         }
 
@@ -300,7 +333,11 @@ impl<'a> Interpreter<'a> {
         match self.get_literal(condition) {
             Ok(Literal::Boolean(boolean)) => Ok(boolean),
             Ok(unexpected) => Err(format!(
+<<<<<<< HEAD
                 "An expression must return a boolean, not `{}`",
+=======
+                "Expression must return boolean, it actually returns {}",
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
                 unexpected
             )),
             Err(error) => Err(error),
@@ -339,12 +376,16 @@ impl<'a> Interpreter<'a> {
                 if scope.contains_key(&id) {
                     if let Literal::Function(_, args, statements) = &scope[&id] {
                         if args.len() > call_args.len() {
+<<<<<<< HEAD
                             return Err(format!(
                                 "Not enought arguments for `{}`, expected `{}` given `{}`!",
                                 id,
                                 call_args.len(),
                                 args.len()
                             ));
+=======
+                            return Err(format!("{} expects {} arguments, given {}", id, args.len(), call_args.len()));
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
                         }
 
                         self.stack.push(HashMap::new());
@@ -373,13 +414,18 @@ impl<'a> Interpreter<'a> {
                 }
             }
 
+<<<<<<< HEAD
             Err(format!("Undefined function `{}`!", id))
+=======
+            Err(format!("Undefined function {}", id))
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
         }
     }
 
     fn eval_list_at(&mut self, list: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
         let list = match self.get_literal(*list)? {
             Literal::List(list) => list,
+<<<<<<< HEAD
             unexpected => return Err(format!("Could not index `{}`", unexpected)),
         };
         let index = match self.get_literal(*index)? {
@@ -389,6 +435,17 @@ impl<'a> Interpreter<'a> {
 
         if index < 0 {
             return Err(format!("The `{}` is not valid as an index!", index));
+=======
+            unexpected => return Err(format!("Cannot index {}", unexpected)),
+        };
+        let index = match self.get_literal(*index)? {
+            Literal::Int(int) => int,
+            unexpected => return Err(format!("Expected Integer, found {:?}", unexpected)),
+        };
+
+        if index < 0 {
+            return Err("Cannot index list with negatives integers".to_string());
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
         }
 
         let index = index as usize;
@@ -434,7 +491,11 @@ impl<'a> Interpreter<'a> {
             }
         }
 
+<<<<<<< HEAD
         Err(format!("The variable `{}` cannot be found!", id))
+=======
+        Err(format!("Variable {} not found", id))
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
     }
 
     pub fn interpret(&mut self) -> Result<(), String> {

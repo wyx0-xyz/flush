@@ -13,6 +13,7 @@ pub fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
     let str_file_path = file_path.to_str().unwrap_or("<not valid unicode>");
 
     if !file_path.exists() {
+<<<<<<< HEAD
         return Err(format!(
             "{}: `{}` does not exist!",
             Red.paint("[error]"),
@@ -26,6 +27,13 @@ pub fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
             Red.paint("[error]"),
             str_file_path
         ));
+=======
+        return Err(format!("{}: Given path does not exist", Red.paint("[error]")));
+    }
+
+    if !file_path.is_file() {
+        return Err(format!("{}: Given path is not a file", Red.paint("[error]")));
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
     }
 
     let absolute_path = canonicalize(file_path).unwrap();
@@ -47,7 +55,7 @@ pub fn run(
         Ok(content) => content,
         Err(e) => {
             return Err(format!(
-                "{}: Couldn't open file: {}",
+                "{}: Could not open file: {}",
                 Red.paint("[error]"),
                 e
             ))
@@ -76,7 +84,11 @@ pub fn run(
 
             if absolute_path == file_path || cache.contains(&absolute_path) {
                 println!(
+<<<<<<< HEAD
                     "{}: Detected cycle import: {} is importing {} mutually",
+=======
+                    "{}: Detected cycle import: {} imports {} mutualy",
+>>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
                     Yellow.paint("[warning]"),
                     Blue.paint(file_path.to_string_lossy()),
                     Blue.paint(absolute_path.to_string_lossy())
