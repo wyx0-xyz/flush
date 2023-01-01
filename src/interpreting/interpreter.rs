@@ -317,6 +317,15 @@ impl<'a> Interpreter<'a> {
             Expr::Call(id, args) => self.eval_call(id, args)?,
             Expr::List(list) => Literal::List(self.get_literals(list)?),
             Expr::ListAt(list, index) => self.eval_list_at(list, index)?,
+            Expr::Dictionnary(dict) => {
+                let mut literals_dict: HashMap<String, Box<Literal>> = HashMap::new();
+
+                for (key, value) in dict {
+                    literals_dict.insert(key, Box::from(self.get_literal(*value)?));
+                }
+
+                Literal::Dictionnary(literals_dict)
+            }
             Expr::BinOp(op, left, right) => self.eval_binary_op(op, left, right)?,
         })
     }

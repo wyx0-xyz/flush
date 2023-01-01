@@ -1,4 +1,5 @@
 use crate::parsing::typing::Statement;
+use std::collections::HashMap;
 use std::fmt;
 
 #[derive(Clone, Debug)]
@@ -8,6 +9,7 @@ pub enum Literal {
     Float(f64),
     Boolean(bool),
     List(Vec<Box<Literal>>),
+    Dictionnary(HashMap<String, Box<Literal>>),
     Function(String, Vec<String>, Vec<Statement>),
     None,
 }
@@ -38,6 +40,19 @@ impl fmt::Display for Literal {
                 }
 
                 write!(f, "]")
+            }
+            Literal::Dictionnary(dict) => {
+                write!(f, "{{")?;
+
+                for (i, key) in dict.keys().enumerate() {
+                    if i == dict.keys().len() - 1 {
+                        write!(f, "\"{}\": {}", key, dict.get(key).unwrap())?;
+                    } else {
+                        write!(f, "\"{}\": {}, ", key, dict.get(key).unwrap())?;
+                    }
+                }
+
+                write!(f, "}}")
             }
             Literal::Function(name, args, _) => {
                 write!(f, "<function:{}#{}>", name, args.join(", "))

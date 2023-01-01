@@ -1,6 +1,7 @@
 use super::typing::*;
 use crate::error::{FlushError, Result};
 use crate::lexing::typing::*;
+use std::collections::HashMap;
 use std::path::PathBuf;
 
 pub struct Parser<'a> {
@@ -327,6 +328,7 @@ impl<'a> Parser<'a> {
                 }
             }
             TokenKind::LBracket => self.parse_list()?,
+            TokenKind::LBrace => self.parse_dict()?,
             TokenKind::Op(op) => {
                 if self.is_at_end() {
                     return Err(FlushError(
@@ -405,7 +407,7 @@ impl<'a> Parser<'a> {
 
             if next.kind == TokenKind::At {
                 let index = self.parse_expr()?;
-                
+
                 return Ok(Expr::ListAt(
                     Box::new(Expr::List(expressions)),
                     Box::new(index),
@@ -416,6 +418,37 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Expr::List(expressions))
+    }
+
+    fn parse_dict(&mut self) -> Result<Expr> {
+        let mut dict: HashMap<String, Box<Expr>> = HashMap::new();
+
+        while !self.is_at_end() && self.current().kind != TokenKind::RBrace {
+            let key = match self.parse_expr()? {
+                Expr::String(key) => key,
+                unexpected => {
+                    return Err(FlushError(
+                        self.file_path.clone(),
+                        self.previous().line,
+                        format!("Expected String, found {:?}", unexpected),
+                    ))
+                }
+            };
+
+            self.expect(TokenKind::Colon)?;
+
+            dict.insert(key, Box::from(self.parse_expr()?));
+
+            if self.current().kind == TokenKind::RBrace {
+                break;
+            }
+
+            self.expect(TokenKind::Comma)?;
+        }
+
+        self.advance();
+
+        Ok(Expr::Dictionnary(dict))
     }
 
     fn parse_number(&mut self) -> Result<Expr> {

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum Statement {
     If(Expr, Vec<Box<Statement>>, Vec<Box<Statement>>), // if (...) { ... }
@@ -14,14 +16,15 @@ pub enum Statement {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
-    String(String),               // "Hello, flush!"
-    Int(i32),                     // -32
-    Float(f64),                   // 18.25
-    Boolean(bool),                // false
-    Var(String),                  // userId
-    Call(String, Vec<Box<Expr>>), // printLn(...)
-    List(Vec<Box<Expr>>),         // [1, 2, 3]
-    ListAt(Box<Expr>, Box<Expr>), // [1, 2, 3]@3
+    String(String),                          // "Hello, flush!"
+    Int(i32),                                // -32
+    Float(f64),                              // 18.25
+    Boolean(bool),                           // false
+    Var(String),                             // userId
+    Call(String, Vec<Box<Expr>>),            // printLn(...)
+    List(Vec<Box<Expr>>),                    // [1, 2, 3]
+    Dictionnary(HashMap<String, Box<Expr>>), // { "key": "value" }
+    ListAt(Box<Expr>, Box<Expr>),            // [1, 2, 3]@3
     BinOp(BinOp, Box<Expr>, Box<Expr>),
 }
 

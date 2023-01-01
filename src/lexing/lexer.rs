@@ -159,6 +159,7 @@ impl<'a> Lexer<'a> {
                 '[' => self.push_token(TokenKind::LBracket),
                 ']' => self.push_token(TokenKind::RBracket),
                 ',' => self.push_token(TokenKind::Comma),
+                ':' => self.push_token(TokenKind::Colon),
                 '@' => self.push_token(TokenKind::At),
                 '+' => self.push_token(TokenKind::Op(Op::Add)),
                 '-' => self.push_token(TokenKind::Op(Op::Sub)),
