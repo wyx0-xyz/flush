@@ -8,16 +8,12 @@ impl<'a> Interpreter<'a> {
         for arg in args {
             match self.get_literal(*arg)? {
                 Literal::String(string) => print!("{}", string),
-<<<<<<< HEAD
                 unexpected => {
                     return Err(format!(
                         "The `putStr` function expected a String, not `{}`",
                         unexpected
                     ))
                 }
-=======
-                _ => return Err("Can only put strings".to_string()),
->>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
             };
         }
 
@@ -51,11 +47,7 @@ impl<'a> Interpreter<'a> {
     pub fn flush_stdout(&mut self, _: Vec<Box<Expr>>) -> Result<Literal, String> {
         match std::io::stdout().flush() {
             Ok(_) => Ok(Literal::None),
-<<<<<<< HEAD
             Err(e) => Err(format!("Could not flush stdout: {}", e)),
-=======
-            Err(e) => Err(format!("Cannot flush stdout: {}", e)),
->>>>>>> 14805591ba50c0b19eb0836af70b0d193e115afc
         }
     }
 
