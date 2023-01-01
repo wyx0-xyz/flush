@@ -106,12 +106,12 @@ impl<'a> Interpreter<'a> {
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
             Statement::Break => self.eval_break()?,
             Statement::Load(file_path) => self.eval_load(file_path)?,
-            Statement::If(condition, body, else_body) => {
-                self.eval_control_flow(condition, body, else_body)?
+            Statement::If(condition, if_body, else_body) => {
+                self.eval_control_flow(condition, if_body, else_body)?
             }
             Statement::Expr(expr) => {
                 if !self.contexts.contains(&Context::Function) {
-                    return Err("Cannot eval expressions outside a function.".to_string());
+                    return Err("Cannot evaluate expression outside a function!".to_string());
                 }
 
                 self.get_literal(expr)?;
@@ -122,7 +122,7 @@ impl<'a> Interpreter<'a> {
 
     fn eval_var_def(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
         if self.stack.last().unwrap().contains_key(&id) {
-            return Err(format!("Variable {} already exists!", id));
+            return Err(format!("The `{}` variable already exists!", id));
         }
 
         let literal = self.get_literal(expr)?;
@@ -159,7 +159,7 @@ impl<'a> Interpreter<'a> {
             }
         }
 
-        Err(format!("Variable {} not found!", id))
+        Err(format!("The `{}` variable does not exist!", id))
     }
 
     fn eval_while(
@@ -206,7 +206,7 @@ impl<'a> Interpreter<'a> {
         statements: Vec<Box<Statement>>,
     ) -> Result<Option<Literal>, String> {
         match self.get_var(id.clone()) {
-            Ok(_) => return Err(format!("Variable {} already exists!", id)),
+            Ok(_) => return Err(format!("The `{}` variable already exists!", id)),
             _ => (),
         }
 
@@ -230,7 +230,7 @@ impl<'a> Interpreter<'a> {
                     match self.eval_statement(*statement) {
                         Ok(_) => {}
                         Err(e) => {
-                            if e != "Can only use break in loops!".to_string() {
+                            if e != "The break keyword cannot be used outside a loop!".to_string() {
                                 return Err(e);
                             }
                         }
@@ -256,7 +256,7 @@ impl<'a> Interpreter<'a> {
             return Ok(None);
         }
 
-        Err("Can only use break in loops!".to_string())
+        Err("The break keyword cannot be used outside a loop!".to_string())
     }
 
     fn eval_load(&mut self, raw_file_path: String) -> Result<Option<Literal>, String> {
@@ -288,10 +288,8 @@ impl<'a> Interpreter<'a> {
         } else {
             else_body
         } {
-            if let Statement::Return(expr) = *statement {
-                return Ok(Some(self.get_literal(expr)?));
-            } else {
-                self.eval_statement(*statement)?;
+            if let Some(result) = self.eval_statement(*statement.clone())? {
+                return Ok(Some(result));
             }
         }
 
@@ -302,7 +300,7 @@ impl<'a> Interpreter<'a> {
         match self.get_literal(condition) {
             Ok(Literal::Boolean(boolean)) => Ok(boolean),
             Ok(unexpected) => Err(format!(
-                "Expression must return boolean, actually return '{}'",
+                "An expression must return a boolean, not `{}`",
                 unexpected
             )),
             Err(error) => Err(error),
@@ -341,7 +339,12 @@ impl<'a> Interpreter<'a> {
                 if scope.contains_key(&id) {
                     if let Literal::Function(_, args, statements) = &scope[&id] {
                         if args.len() > call_args.len() {
-                            return Err(format!("Not enought arguments for {}", id));
+                            return Err(format!(
+                                "Not enought arguments for `{}`, expected `{}` given `{}`!",
+                                id,
+                                call_args.len(),
+                                args.len()
+                            ));
                         }
 
                         self.stack.push(HashMap::new());
@@ -370,28 +373,32 @@ impl<'a> Interpreter<'a> {
                 }
             }
 
-            Err(format!("Undefined function {}!", id))
+            Err(format!("Undefined function `{}`!", id))
         }
     }
 
     fn eval_list_at(&mut self, list: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
         let list = match self.get_literal(*list)? {
             Literal::List(list) => list,
-            unexpected => return Err(format!("Couldn't index '{}'", unexpected)),
+            unexpected => return Err(format!("Could not index `{}`", unexpected)),
         };
         let index = match self.get_literal(*index)? {
             Literal::Int(int) => int,
-            unexpected => return Err(format!("Expected Integer found '{:?}'", unexpected)),
+            unexpected => return Err(format!("Expected Integer found `{:?}`", unexpected)),
         };
 
         if index < 0 {
-            return Err("Couldn't index list with negatives integers".to_string());
+            return Err(format!("The `{}` is not valid as an index!", index));
         }
 
         let index = index as usize;
 
         if index >= list.len() {
-            return Err("List index out of range".to_string());
+            return Err(format!(
+                "The list has a length of `{}` but the index is `{}`!",
+                list.len(),
+                index
+            ));
         }
 
         Ok(*list[index].clone())
@@ -427,7 +434,7 @@ impl<'a> Interpreter<'a> {
             }
         }
 
-        Err(format!("Variable {} not found!", id))
+        Err(format!("The variable `{}` cannot be found!", id))
     }
 
     pub fn interpret(&mut self) -> Result<(), String> {

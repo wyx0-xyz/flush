@@ -10,13 +10,22 @@ use std::path::PathBuf;
 
 pub fn process_file_path(raw_file_path: &str) -> Result<PathBuf, String> {
     let file_path = PathBuf::from(raw_file_path);
+    let str_file_path = file_path.to_str().unwrap_or("<not valid unicode>");
 
     if !file_path.exists() {
-        return Err(format!("{}: Path does not exist!", Red.paint("[error]")));
+        return Err(format!(
+            "{}: `{}` does not exist!",
+            Red.paint("[error]"),
+            str_file_path
+        ));
     }
 
     if !file_path.is_file() {
-        return Err(format!("{}: Path isn't a file!", Red.paint("[error]")));
+        return Err(format!(
+            "{}: `{}` is not a file!",
+            Red.paint("[error]"),
+            str_file_path
+        ));
     }
 
     let absolute_path = canonicalize(file_path).unwrap();
@@ -67,7 +76,7 @@ pub fn run(
 
             if absolute_path == file_path || cache.contains(&absolute_path) {
                 println!(
-                    "{}: Detected cycle import: {} and {}",
+                    "{}: Detected cycle import: {} is importing {} mutually",
                     Yellow.paint("[warning]"),
                     Blue.paint(file_path.to_string_lossy()),
                     Blue.paint(absolute_path.to_string_lossy())
