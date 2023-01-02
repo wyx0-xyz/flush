@@ -5,9 +5,15 @@ use std::io::Write;
 
 impl<'a> Interpreter<'a> {
     pub fn put_str(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
-        for arg in args {
-            match self.get_literal(*arg)? {
-                Literal::String(string) => print!("{}", string),
+        for (i, arg) in args.iter().enumerate() {
+            match self.get_literal(*arg.clone())? {
+                Literal::String(string) => {
+                    if i == args.len() - 1 {
+                        print!("{}", string);
+                    } else {
+                        print!("{} ", string);
+                    }
+                }
                 unexpected => {
                     return Err(format!(
                         "The `putStr` function expected a String, not `{}`",
@@ -29,8 +35,12 @@ impl<'a> Interpreter<'a> {
     }
 
     pub fn print(&mut self, args: Vec<Box<Expr>>) -> Result<Literal, String> {
-        for arg in args {
-            print!("{}", self.get_literal(*arg)?);
+        for (i, arg) in args.iter().enumerate() {
+            if i == args.len() - 1 {
+                print!("{}", self.get_literal(*arg.clone())?);
+            } else {
+                print!("{} ", self.get_literal(*arg.clone())?);
+            }
         }
 
         Ok(Literal::None)
