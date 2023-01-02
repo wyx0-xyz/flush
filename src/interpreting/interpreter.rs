@@ -164,13 +164,27 @@ impl<'a> Interpreter<'a> {
         index: Expr,
         value: Expr,
     ) -> Result<Option<Literal>, String> {
+        let value = Box::from(self.get_literal(value)?);
+
         if let Expr::Var(var) = expr.clone() {
-            match self.get_literal(expr)? {
+            match self.get_literal(expr.clone())? {
                 Literal::List(mut list) => {
                     let index = self.get_index(&list, Box::from(index))?;
-                    list[index] = Box::from(self.get_literal(value)?);
+                    list[index] = value;
 
                     self.set_var(var, Literal::List(list))?;
+                }
+                Literal::Dictionnary(mut dict) => {
+                    let key = match self.get_literal(index.clone())? {
+                        Literal::String(key) => key,
+                        unexpected => {
+                            return Err(format!("Expected `String` found `{:?}`", unexpected))
+                        }
+                    };
+
+                    dict.insert(key, value);
+
+                    self.set_var(var, Literal::Dictionnary(dict))?;
                 }
                 _ => unreachable!(),
             }
