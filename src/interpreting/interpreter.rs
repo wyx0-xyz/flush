@@ -396,6 +396,21 @@ impl<'a> Interpreter<'a> {
                 let index = self.get_index(&list, index)?;
                 Ok(self.eval_list_at(list, index)?)
             }
+            Literal::Dictionnary(dict) => match self.get_literal(*index)? {
+                Literal::String(key) => {
+                    if let Some(value) = dict.get(&key) {
+                        Ok(*value.clone())
+                    } else {
+                        return Err(format!("The key `{}` does not exist in `{:?}`", key, dict));
+                    }
+                }
+                unexpected => {
+                    return Err(format!(
+                        "Could not index `Dictionnary` with {:?}",
+                        unexpected
+                    ))
+                }
+            },
             unexpected => Err(format!("Could not index {:?}", unexpected)),
         }
     }

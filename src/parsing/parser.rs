@@ -473,6 +473,16 @@ impl<'a> Parser<'a> {
 
         self.advance();
 
+        if !self.is_at_end() {
+            let next = self.advance().unwrap();
+
+            if next.kind == TokenKind::LBracket {
+                return Ok(self.parse_index(Expr::Dictionnary(dict))?);
+            }
+
+            self.position -= 1;
+        }
+
         Ok(Expr::Dictionnary(dict))
     }
 
