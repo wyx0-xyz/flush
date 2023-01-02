@@ -11,7 +11,6 @@ pub enum TokenKind {
     If,             // if
     Else,           // else
     Def,            // def
-    Set,            // set
     Return,         // return
     While,          // while
     For,            // for

@@ -134,7 +134,6 @@ impl<'a> Lexer<'a> {
             "if" => TokenKind::If,
             "else" => TokenKind::Else,
             "def" => TokenKind::Def,
-            "set" => TokenKind::Set,
             "return" => TokenKind::Return,
             "while" => TokenKind::While,
             "for" => TokenKind::For,

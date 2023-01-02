@@ -70,8 +70,7 @@ impl<'a> Parser<'a> {
     fn parse_statement(&mut self) -> Result<Statement> {
         Ok(match self.advance().unwrap().kind {
             TokenKind::If => self.parse_control_flow()?,
-            TokenKind::Def => self.parse_def_set(true)?,
-            TokenKind::Set => self.parse_def_set(false)?,
+            TokenKind::Def => self.parse_def()?,
             TokenKind::Return => Statement::Return(self.parse_expr()?),
             TokenKind::While => self.parse_while()?,
             TokenKind::For => self.parse_for()?,
@@ -79,7 +78,20 @@ impl<'a> Parser<'a> {
             TokenKind::Load => self.parse_load()?,
             unknow => {
                 self.position -= 1;
+
                 match self.parse_expr() {
+                    Ok(Expr::Var(var)) => {
+                        if self.is_at_end() {
+                            Statement::Expr(Expr::Var(var))
+                        } else {
+                            if self.advance().unwrap().kind == TokenKind::Assign {
+                                self.parse_assign(var)?
+                            } else {
+                                self.position -= 1;
+                                Statement::Expr(Expr::Var(var))
+                            }
+                        }
+                    }
                     Ok(expr) => Statement::Expr(expr),
                     x => {
                         println!("{:?}", x);
@@ -130,7 +142,7 @@ impl<'a> Parser<'a> {
         Ok(Statement::If(condition, if_body, else_body))
     }
 
-    fn parse_def_set(&mut self, def: bool) -> Result<Statement> {
+    fn parse_def(&mut self) -> Result<Statement> {
         let id = match self.advance() {
             Some(token) => match token.kind {
                 TokenKind::Ident(id) => id,
@@ -163,11 +175,7 @@ impl<'a> Parser<'a> {
         };
 
         Ok(match token.kind {
-            TokenKind::Assign => (if def {
-                Statement::VarDef
-            } else {
-                Statement::VarSet
-            })(id, self.parse_expr()?),
+            TokenKind::Assign => Statement::VarDef(id, self.parse_expr()?),
             TokenKind::LParen => self.parse_func_def(id)?,
             unexpected => {
                 return Err(FlushError(
@@ -532,6 +540,12 @@ impl<'a> Parser<'a> {
         }
 
         Ok(Expr::Call(id, args))
+    }
+
+    fn parse_assign(&mut self, var: String) -> Result<Statement> {
+        let value = self.parse_expr()?;
+
+        Ok(Statement::VarSet(var, value))
     }
 
     pub fn parse(&mut self) -> Result<&Vec<Statement>> {
