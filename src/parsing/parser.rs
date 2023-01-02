@@ -81,7 +81,8 @@ impl<'a> Parser<'a> {
                 self.position -= 1;
                 match self.parse_expr() {
                     Ok(expr) => Statement::Expr(expr),
-                    _ => {
+                    x => {
+                        println!("{:?}", x);
                         return Err(FlushError(
                             self.file_path.clone(),
                             self.previous().line,
@@ -310,7 +311,19 @@ impl<'a> Parser<'a> {
         };
 
         let expr = match next.kind {
-            TokenKind::String(string) => Expr::String(string),
+            TokenKind::String(string) => {
+                if self.is_at_end() {
+                    return Ok(Expr::String(string));
+                }
+
+                match self.advance().unwrap().kind {
+                    TokenKind::LBracket => self.parse_index(Expr::String(string))?,
+                    _ => {
+                        self.position -= 1;
+                        Expr::String(string)
+                    }
+                }
+            }
             TokenKind::Int(int) => Expr::Int(int),
             TokenKind::Float(float) => Expr::Float(float),
             TokenKind::Boolean(boolean) => Expr::Boolean(boolean),
@@ -321,7 +334,7 @@ impl<'a> Parser<'a> {
 
                 match self.advance().unwrap().kind {
                     TokenKind::LParen => self.parse_func_call(id)?,
-                    TokenKind::LBracket => self.parse_list_index(Expr::Var(id))?,
+                    TokenKind::LBracket => self.parse_index(Expr::Var(id))?,
                     _ => {
                         self.position -= 1;
                         Expr::Var(id)
@@ -407,7 +420,7 @@ impl<'a> Parser<'a> {
             let next = self.advance().unwrap();
 
             if next.kind == TokenKind::LBracket {
-                return Ok(self.parse_list_index(Expr::List(expressions))?);
+                return Ok(self.parse_index(Expr::List(expressions))?);
             }
 
             self.position -= 1;
@@ -416,12 +429,12 @@ impl<'a> Parser<'a> {
         Ok(Expr::List(expressions))
     }
 
-    fn parse_list_index(&mut self, expr: Expr) -> Result<Expr> {
+    fn parse_index(&mut self, expr: Expr) -> Result<Expr> {
         let index = self.parse_expr()?;
 
         self.expect(TokenKind::RBracket)?;
 
-        Ok(Expr::ListIndex(Box::new(expr), Box::new(index)))
+        Ok(Expr::Index(Box::new(expr), Box::new(index)))
     }
 
     fn parse_dict(&mut self) -> Result<Expr> {
@@ -512,7 +525,7 @@ impl<'a> Parser<'a> {
 
         if !self.is_at_end() {
             if self.advance().unwrap().kind == TokenKind::LBracket {
-                return Ok(self.parse_list_index(Expr::Call(id, args))?);
+                return Ok(self.parse_index(Expr::Call(id, args))?);
             }
 
             self.position -= 1;

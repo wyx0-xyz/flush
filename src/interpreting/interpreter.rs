@@ -316,7 +316,7 @@ impl<'a> Interpreter<'a> {
             Expr::Var(id) => self.get_var(id)?,
             Expr::Call(id, args) => self.eval_call(id, args)?,
             Expr::List(list) => Literal::List(self.get_literals(list)?),
-            Expr::ListIndex(list, index) => self.eval_list_at(list, index)?,
+            Expr::Index(list, index) => self.eval_index(list, index)?,
             Expr::Dictionnary(dict) => {
                 let mut literals_dict: HashMap<String, Box<Literal>> = HashMap::new();
 
@@ -386,11 +386,31 @@ impl<'a> Interpreter<'a> {
         }
     }
 
-    fn eval_list_at(&mut self, list: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
-        let list = match self.get_literal(*list)? {
-            Literal::List(list) => list,
-            unexpected => return Err(format!("Could not index `{}`", unexpected)),
-        };
+    fn eval_index(&mut self, expr: Box<Expr>, index: Box<Expr>) -> Result<Literal, String> {
+        match self.get_literal(*expr)? {
+            Literal::String(string) => {
+                let index = self.get_index(&Vec::from(string.clone()), index)?;
+                Ok(self.eval_string_at(string, index)?)
+            }
+            Literal::List(list) => {
+                let index = self.get_index(&list, index)?;
+                Ok(self.eval_list_at(list, index)?)
+            }
+            unexpected => Err(format!("Could not index {:?}", unexpected)),
+        }
+    }
+
+    fn eval_string_at(&mut self, string: String, index: usize) -> Result<Literal, String> {
+        Ok(Literal::String(
+            string.chars().nth(index).unwrap().to_string(),
+        ))
+    }
+
+    fn eval_list_at(&mut self, list: Vec<Box<Literal>>, index: usize) -> Result<Literal, String> {
+        Ok(*list[index].clone())
+    }
+
+    fn get_index<T>(&mut self, list: &Vec<T>, index: Box<Expr>) -> Result<usize, String> {
         let index = match self.get_literal(*index)? {
             Literal::Int(int) => int,
             unexpected => return Err(format!("Expected Integer found `{:?}`", unexpected)),
@@ -410,7 +430,7 @@ impl<'a> Interpreter<'a> {
             ));
         }
 
-        Ok(*list[index].clone())
+        Ok(index)
     }
 
     fn eval_binary_op(
