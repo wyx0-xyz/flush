@@ -101,6 +101,7 @@ impl<'a> Interpreter<'a> {
             Statement::VarDef(id, expr) => self.eval_var_def(id, expr)?,
             Statement::FuncDef(id, args, statements) => self.eval_func_def(id, args, statements)?,
             Statement::VarSet(id, expr) => self.eval_var_set(id, expr)?,
+            Statement::IndexSet(expr, index, value) => self.eval_index_set(expr, index, value)?,
             Statement::Return(expr) => Some(self.get_literal(expr)?),
             Statement::While(condition, statements) => self.eval_while(condition, statements)?,
             Statement::For(id, list, statements) => self.eval_for(id, list, statements)?,
@@ -152,14 +153,30 @@ impl<'a> Interpreter<'a> {
     fn eval_var_set(&mut self, id: String, expr: Expr) -> Result<Option<Literal>, String> {
         let literal = self.get_literal(expr)?;
 
-        for stack in self.stack.iter_mut().rev() {
-            if stack.clone().contains_key(&*id) {
-                stack.insert(id, literal);
-                return Ok(None);
+        self.set_var(id, literal)?;
+
+        Ok(None)
+    }
+
+    fn eval_index_set(
+        &mut self,
+        expr: Expr,
+        index: Expr,
+        value: Expr,
+    ) -> Result<Option<Literal>, String> {
+        if let Expr::Var(var) = expr.clone() {
+            match self.get_literal(expr)? {
+                Literal::List(mut list) => {
+                    let index = self.get_index(&list, Box::from(index))?;
+                    list[index] = Box::from(self.get_literal(value)?);
+
+                    self.set_var(var, Literal::List(list))?;
+                }
+                _ => unreachable!(),
             }
         }
 
-        Err(format!("The `{}` variable does not exist!", id))
+        Ok(None)
     }
 
     fn eval_while(
@@ -479,6 +496,19 @@ impl<'a> Interpreter<'a> {
         }
 
         Err(format!("The variable `{}` cannot be found!", id))
+    }
+
+    pub fn set_var(&mut self, id: String, value: Literal) -> Result<Option<Literal>, String> {
+        self.get_var(id.clone())?;
+
+        for stack in self.stack.iter_mut().rev() {
+            if stack.clone().contains_key(&*id) {
+                stack.insert(id, value);
+                return Ok(None);
+            }
+        }
+
+        unreachable!()
     }
 
     pub fn interpret(&mut self) -> Result<(), String> {

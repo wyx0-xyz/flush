@@ -85,10 +85,22 @@ impl<'a> Parser<'a> {
                             Statement::Expr(Expr::Var(var))
                         } else {
                             if self.advance().unwrap().kind == TokenKind::Assign {
-                                self.parse_assign(var)?
+                                self.parse_var_set(var)?
                             } else {
                                 self.position -= 1;
                                 Statement::Expr(Expr::Var(var))
+                            }
+                        }
+                    }
+                    Ok(Expr::Index(expr, index)) => {
+                        if self.is_at_end() {
+                            Statement::Expr(Expr::Index(expr, index))
+                        } else {
+                            if self.advance().unwrap().kind == TokenKind::Assign {
+                                self.parse_index_set(*expr, *index)?
+                            } else {
+                                self.position -= 1;
+                                Statement::Expr(Expr::Index(expr, index))
                             }
                         }
                     }
@@ -425,9 +437,7 @@ impl<'a> Parser<'a> {
         self.expect(TokenKind::RBracket)?;
 
         if !self.is_at_end() {
-            let next = self.advance().unwrap();
-
-            if next.kind == TokenKind::LBracket {
+            if self.advance().unwrap().kind == TokenKind::LBracket {
                 return Ok(self.parse_index(Expr::List(expressions))?);
             }
 
@@ -474,9 +484,7 @@ impl<'a> Parser<'a> {
         self.advance();
 
         if !self.is_at_end() {
-            let next = self.advance().unwrap();
-
-            if next.kind == TokenKind::LBracket {
+            if self.advance().unwrap().kind == TokenKind::LBracket {
                 return Ok(self.parse_index(Expr::Dictionnary(dict))?);
             }
 
@@ -552,10 +560,16 @@ impl<'a> Parser<'a> {
         Ok(Expr::Call(id, args))
     }
 
-    fn parse_assign(&mut self, var: String) -> Result<Statement> {
+    fn parse_var_set(&mut self, var: String) -> Result<Statement> {
         let value = self.parse_expr()?;
 
         Ok(Statement::VarSet(var, value))
+    }
+
+    fn parse_index_set(&mut self, expr: Expr, index: Expr) -> Result<Statement> {
+        let value = self.parse_expr()?;
+
+        Ok(Statement::IndexSet(expr, index, value))
     }
 
     pub fn parse(&mut self) -> Result<&Vec<Statement>> {
