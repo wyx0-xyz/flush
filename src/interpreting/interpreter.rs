@@ -316,7 +316,7 @@ impl<'a> Interpreter<'a> {
             Expr::Var(id) => self.get_var(id)?,
             Expr::Call(id, args) => self.eval_call(id, args)?,
             Expr::List(list) => Literal::List(self.get_literals(list)?),
-            Expr::ListAt(list, index) => self.eval_list_at(list, index)?,
+            Expr::ListIndex(list, index) => self.eval_list_at(list, index)?,
             Expr::Dictionnary(dict) => {
                 let mut literals_dict: HashMap<String, Box<Literal>> = HashMap::new();
 

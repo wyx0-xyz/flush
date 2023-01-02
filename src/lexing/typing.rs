@@ -8,7 +8,6 @@ pub enum TokenKind {
     RBracket,       // ]
     Comma,          // ,
     Colon,          // :
-    At,             // @
     If,             // if
     Else,           // else
     Def,            // def
